@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+  <title>期末听力考试</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">FINAL LISTENING EXAMINATION</div>
+        <h1 id="examTitle">对外汉语初级期末听力考试</h1>
+      </div>
+      <div id="timerBox" class="timer hidden" aria-live="polite">
+        <span>剩余时间</span>
+        <strong id="timer">60:00</strong>
+      </div>
+    </header>
+
+    <section id="app" class="card" aria-live="polite"></section>
+
+    <footer>
+      <span>请勿刷新、关闭页面或切换设备。</span>
+    </footer>
+  </main>
+
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
