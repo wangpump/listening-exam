@@ -16,7 +16,7 @@ export const QUESTIONS = [
       "B": "可乐",
       "C": "牛奶"
     },
-    "audio": "audio/q001.mp3"
+    "audio": "q001.mp3"
   },
   {
     "number": 2,
@@ -27,7 +27,7 @@ export const QUESTIONS = [
       "B": "学校",
       "C": "商店"
     },
-    "audio": "audio/q002.mp3"
+    "audio": "q002.mp3"
   },
   {
     "number": 3,
@@ -38,7 +38,7 @@ export const QUESTIONS = [
       "B": "高兴",
       "C": "累"
     },
-    "audio": "audio/q003.mp3"
+    "audio": "q003.mp3"
   },
   {
     "number": 4,
@@ -49,7 +49,7 @@ export const QUESTIONS = [
       "B": "学生",
       "C": "老师"
     },
-    "audio": "audio/q004.mp3"
+    "audio": "q004.mp3"
   },
   {
     "number": 5,
@@ -60,7 +60,7 @@ export const QUESTIONS = [
       "B": "吃饭",
       "C": "买东西"
     },
-    "audio": "audio/q005.mp3"
+    "audio": "q005.mp3"
   },
   {
     "number": 6,
@@ -71,7 +71,7 @@ export const QUESTIONS = [
       "B": "看看",
       "C": "听听"
     },
-    "audio": "audio/q006.mp3"
+    "audio": "q006.mp3"
   },
   {
     "number": 7,
@@ -82,7 +82,7 @@ export const QUESTIONS = [
       "B": "不可以",
       "C": "不知道"
     },
-    "audio": "audio/q007.mp3"
+    "audio": "q007.mp3"
   },
   {
     "number": 8,
@@ -93,7 +93,7 @@ export const QUESTIONS = [
       "B": "那个",
       "C": "哪个"
     },
-    "audio": "audio/q008.mp3"
+    "audio": "q008.mp3"
   },
   {
     "number": 9,
@@ -104,7 +104,7 @@ export const QUESTIONS = [
       "B": "北京路",
       "C": "人民路"
     },
-    "audio": "audio/q009.mp3"
+    "audio": "q009.mp3"
   },
   {
     "number": 10,
@@ -115,7 +115,7 @@ export const QUESTIONS = [
       "B": "飞机",
       "C": "火车"
     },
-    "audio": "audio/q010.mp3"
+    "audio": "q010.mp3"
   },
   {
     "number": 11,
@@ -126,7 +126,7 @@ export const QUESTIONS = [
       "B": "右边",
       "C": "后边"
     },
-    "audio": "audio/q011.mp3"
+    "audio": "q011.mp3"
   },
   {
     "number": 12,
@@ -137,7 +137,7 @@ export const QUESTIONS = [
       "B": "前面",
       "C": "里面"
     },
-    "audio": "audio/q012.mp3"
+    "audio": "q012.mp3"
   },
   {
     "number": 13,
@@ -148,7 +148,7 @@ export const QUESTIONS = [
       "B": "往右走",
       "C": "往前走"
     },
-    "audio": "audio/q013.mp3"
+    "audio": "q013.mp3"
   },
   {
     "number": 14,
@@ -159,7 +159,7 @@ export const QUESTIONS = [
       "B": "吃药",
       "C": "看医生"
     },
-    "audio": "audio/q014.mp3"
+    "audio": "q014.mp3"
   },
   {
     "number": 15,
@@ -170,7 +170,7 @@ export const QUESTIONS = [
       "B": "喝水",
       "C": "喝茶"
     },
-    "audio": "audio/q015.mp3"
+    "audio": "q015.mp3"
   },
   {
     "number": 16,
@@ -181,7 +181,7 @@ export const QUESTIONS = [
       "B": "多少人",
       "C": "多大"
     },
-    "audio": "audio/q016.mp3"
+    "audio": "q016.mp3"
   },
   {
     "number": 17,
@@ -192,7 +192,7 @@ export const QUESTIONS = [
       "B": "十五块",
       "C": "五块十"
     },
-    "audio": "audio/q017.mp3"
+    "audio": "q017.mp3"
   },
   {
     "number": 18,
@@ -203,7 +203,7 @@ export const QUESTIONS = [
       "B": "一瓶",
       "C": "一本"
     },
-    "audio": "audio/q018.mp3"
+    "audio": "q018.mp3"
   },
   {
     "number": 19,
@@ -214,7 +214,7 @@ export const QUESTIONS = [
       "B": "哪个",
       "C": "怎么"
     },
-    "audio": "audio/q019.mp3"
+    "audio": "q019.mp3"
   },
   {
     "number": 20,
@@ -225,7 +225,7 @@ export const QUESTIONS = [
       "B": "一直往后走",
       "C": "一直往左走"
     },
-    "audio": "audio/q020.mp3"
+    "audio": "q020.mp3"
   },
   {
     "number": 21,
@@ -236,7 +236,7 @@ export const QUESTIONS = [
       "B": "没有",
       "C": "不知道"
     },
-    "audio": "audio/q021.mp3"
+    "audio": "q021.mp3"
   },
   {
     "number": 22,
@@ -247,7 +247,7 @@ export const QUESTIONS = [
       "B": "茶",
       "C": "水"
     },
-    "audio": "audio/q022.mp3"
+    "audio": "q022.mp3"
   },
   {
     "number": 23,
@@ -258,7 +258,7 @@ export const QUESTIONS = [
       "B": "饿了",
       "C": "高兴了"
     },
-    "audio": "audio/q023.mp3"
+    "audio": "q023.mp3"
   },
   {
     "number": 24,
@@ -269,7 +269,7 @@ export const QUESTIONS = [
       "B": "多喝咖啡",
       "C": "买东西"
     },
-    "audio": "audio/q024.mp3"
+    "audio": "q024.mp3"
   },
   {
     "number": 25,
@@ -280,7 +280,7 @@ export const QUESTIONS = [
       "B": "因为很高兴",
       "C": "因为要买东西"
     },
-    "audio": "audio/q025.mp3"
+    "audio": "q025.mp3"
   },
   {
     "number": 26,
@@ -291,7 +291,7 @@ export const QUESTIONS = [
       "B": "吃",
       "C": "喝"
     },
-    "audio": "audio/q026.mp3"
+    "audio": "q026.mp3"
   },
   {
     "number": 27,
@@ -302,7 +302,7 @@ export const QUESTIONS = [
       "B": "没有",
       "C": "不知道"
     },
-    "audio": "audio/q027.mp3"
+    "audio": "q027.mp3"
   },
   {
     "number": 28,
@@ -313,7 +313,7 @@ export const QUESTIONS = [
       "B": "那个",
       "C": "两个都喜欢"
     },
-    "audio": "audio/q028.mp3"
+    "audio": "q028.mp3"
   },
   {
     "number": 29,
@@ -324,7 +324,7 @@ export const QUESTIONS = [
       "B": "我们喝咖啡。",
       "C": "我们感冒了。"
     },
-    "audio": "audio/q029.mp3"
+    "audio": "q029.mp3"
   },
   {
     "number": 30,
@@ -335,7 +335,7 @@ export const QUESTIONS = [
       "B": "南京路",
       "C": "学校"
     },
-    "audio": "audio/q030.mp3"
+    "audio": "q030.mp3"
   },
   {
     "number": 31,
@@ -346,7 +346,7 @@ export const QUESTIONS = [
       "B": "坐飞机",
       "C": "坐出租车"
     },
-    "audio": "audio/q031.mp3"
+    "audio": "q031.mp3"
   },
   {
     "number": 32,
@@ -357,7 +357,7 @@ export const QUESTIONS = [
       "B": "买东西",
       "C": "看医生"
     },
-    "audio": "audio/q032.mp3"
+    "audio": "q032.mp3"
   },
   {
     "number": 33,
@@ -368,7 +368,7 @@ export const QUESTIONS = [
       "B": "后面",
       "C": "左边"
     },
-    "audio": "audio/q033.mp3"
+    "audio": "q033.mp3"
   },
   {
     "number": 34,
@@ -379,7 +379,7 @@ export const QUESTIONS = [
       "B": "往右",
       "C": "往后"
     },
-    "audio": "audio/q034.mp3"
+    "audio": "q034.mp3"
   },
   {
     "number": 35,
@@ -390,7 +390,7 @@ export const QUESTIONS = [
       "B": "右边",
       "C": "后面"
     },
-    "audio": "audio/q035.mp3"
+    "audio": "q035.mp3"
   },
   {
     "number": 36,
@@ -401,7 +401,7 @@ export const QUESTIONS = [
       "B": "右边",
       "C": "前面"
     },
-    "audio": "audio/q036.mp3"
+    "audio": "q036.mp3"
   },
   {
     "number": 37,
@@ -412,7 +412,7 @@ export const QUESTIONS = [
       "B": "十个人",
       "C": "十点"
     },
-    "audio": "audio/q037.mp3"
+    "audio": "q037.mp3"
   },
   {
     "number": 38,
@@ -423,7 +423,7 @@ export const QUESTIONS = [
       "B": "15元2角",
       "C": "25元1角"
     },
-    "audio": "audio/q038.mp3"
+    "audio": "q038.mp3"
   },
   {
     "number": 39,
@@ -434,7 +434,7 @@ export const QUESTIONS = [
       "B": "5元8角",
       "C": "85元"
     },
-    "audio": "audio/q039.mp3"
+    "audio": "q039.mp3"
   },
   {
     "number": 40,
@@ -445,7 +445,7 @@ export const QUESTIONS = [
       "B": "20元",
       "C": "25元"
     },
-    "audio": "audio/q040.mp3"
+    "audio": "q040.mp3"
   },
   {
     "number": 41,
@@ -456,7 +456,7 @@ export const QUESTIONS = [
       "B": "8元5角",
       "C": "15元"
     },
-    "audio": "audio/q041.mp3"
+    "audio": "q041.mp3"
   },
   {
     "number": 42,
@@ -467,7 +467,7 @@ export const QUESTIONS = [
       "B": "茶",
       "C": "水"
     },
-    "audio": "audio/q042.mp3"
+    "audio": "q042.mp3"
   },
   {
     "number": 43,
@@ -478,7 +478,7 @@ export const QUESTIONS = [
       "B": "饿了",
       "C": "累了"
     },
-    "audio": "audio/q043.mp3"
+    "audio": "q043.mp3"
   },
   {
     "number": 44,
@@ -489,7 +489,7 @@ export const QUESTIONS = [
       "B": "医院",
       "C": "学校"
     },
-    "audio": "audio/q044.mp3"
+    "audio": "q044.mp3"
   },
   {
     "number": 45,
@@ -500,7 +500,7 @@ export const QUESTIONS = [
       "B": "喝咖啡",
       "C": "买东西"
     },
-    "audio": "audio/q045.mp3"
+    "audio": "q045.mp3"
   },
   {
     "number": 46,
@@ -511,7 +511,7 @@ export const QUESTIONS = [
       "B": "试衣服",
       "C": "看医生"
     },
-    "audio": "audio/q046.mp3"
+    "audio": "q046.mp3"
   },
   {
     "number": 47,
@@ -522,7 +522,7 @@ export const QUESTIONS = [
       "B": "那个",
       "C": "两个都喜欢"
     },
-    "audio": "audio/q047.mp3"
+    "audio": "q047.mp3"
   },
   {
     "number": 48,
@@ -533,7 +533,7 @@ export const QUESTIONS = [
       "B": "28元5角",
       "C": "25元8角"
     },
-    "audio": "audio/q048.mp3"
+    "audio": "q048.mp3"
   },
   {
     "number": 49,
@@ -544,7 +544,7 @@ export const QUESTIONS = [
       "B": "医院",
       "C": "学校"
     },
-    "audio": "audio/q049.mp3"
+    "audio": "q049.mp3"
   },
   {
     "number": 50,
@@ -555,7 +555,7 @@ export const QUESTIONS = [
       "B": "买东西",
       "C": "上课"
     },
-    "audio": "audio/q050.mp3"
+    "audio": "q050.mp3"
   },
   {
     "number": 51,
@@ -566,7 +566,7 @@ export const QUESTIONS = [
       "B": "往右走",
       "C": "往前走"
     },
-    "audio": "audio/q051.mp3"
+    "audio": "q051.mp3"
   },
   {
     "number": 52,
@@ -577,7 +577,7 @@ export const QUESTIONS = [
       "B": "不远",
       "C": "不知道"
     },
-    "audio": "audio/q052.mp3"
+    "audio": "q052.mp3"
   },
   {
     "number": 53,
@@ -588,7 +588,7 @@ export const QUESTIONS = [
       "B": "银行右边",
       "C": "银行后面"
     },
-    "audio": "audio/q053.mp3"
+    "audio": "q053.mp3"
   },
   {
     "number": 54,
@@ -599,7 +599,7 @@ export const QUESTIONS = [
       "B": "坐飞机",
       "C": "走路"
     },
-    "audio": "audio/q054.mp3"
+    "audio": "q054.mp3"
   },
   {
     "number": 55,
@@ -610,7 +610,7 @@ export const QUESTIONS = [
       "B": "冰咖啡",
       "C": "热茶"
     },
-    "audio": "audio/q055.mp3"
+    "audio": "q055.mp3"
   },
   {
     "number": 56,
@@ -621,7 +621,7 @@ export const QUESTIONS = [
       "B": "咖啡",
       "C": "茶"
     },
-    "audio": "audio/q056.mp3"
+    "audio": "q056.mp3"
   },
   {
     "number": 57,
@@ -632,7 +632,7 @@ export const QUESTIONS = [
       "B": "15元5角",
       "C": "55元"
     },
-    "audio": "audio/q057.mp3"
+    "audio": "q057.mp3"
   },
   {
     "number": 58,
@@ -643,7 +643,7 @@ export const QUESTIONS = [
       "B": "因为买东西",
       "C": "因为去南京路"
     },
-    "audio": "audio/q058.mp3"
+    "audio": "q058.mp3"
   },
   {
     "number": 59,
@@ -654,7 +654,7 @@ export const QUESTIONS = [
       "B": "好多了",
       "C": "还没有吃药"
     },
-    "audio": "audio/q059.mp3"
+    "audio": "q059.mp3"
   },
   {
     "number": 60,
@@ -665,7 +665,7 @@ export const QUESTIONS = [
       "B": "往左",
       "C": "往右"
     },
-    "audio": "audio/q060.mp3"
+    "audio": "q060.mp3"
   },
   {
     "number": 61,
@@ -676,7 +676,7 @@ export const QUESTIONS = [
       "B": "饿了",
       "C": "高兴了"
     },
-    "audio": "audio/q061.mp3"
+    "audio": "q061.mp3"
   },
   {
     "number": 62,
@@ -687,7 +687,7 @@ export const QUESTIONS = [
       "B": "咖啡",
       "C": "水"
     },
-    "audio": "audio/q062.mp3"
+    "audio": "q062.mp3"
   },
   {
     "number": 63,
@@ -698,7 +698,7 @@ export const QUESTIONS = [
       "B": "南京路",
       "C": "学校"
     },
-    "audio": "audio/q063.mp3"
+    "audio": "q063.mp3"
   },
   {
     "number": 64,
@@ -709,7 +709,7 @@ export const QUESTIONS = [
       "B": "吃蛋糕",
       "C": "试衣服"
     },
-    "audio": "audio/q064.mp3"
+    "audio": "q064.mp3"
   },
   {
     "number": 65,
@@ -720,7 +720,7 @@ export const QUESTIONS = [
       "B": "看医生",
       "C": "上课"
     },
-    "audio": "audio/q065.mp3"
+    "audio": "q065.mp3"
   },
   {
     "number": 66,
@@ -731,7 +731,7 @@ export const QUESTIONS = [
       "B": "吃药",
       "C": "买衣服"
     },
-    "audio": "audio/q066.mp3"
+    "audio": "q066.mp3"
   },
   {
     "number": 67,
@@ -742,7 +742,7 @@ export const QUESTIONS = [
       "B": "咖啡",
       "C": "水"
     },
-    "audio": "audio/q067.mp3"
+    "audio": "q067.mp3"
   },
   {
     "number": 68,
@@ -753,7 +753,7 @@ export const QUESTIONS = [
       "B": "水",
       "C": "咖啡"
     },
-    "audio": "audio/q068.mp3"
+    "audio": "q068.mp3"
   },
   {
     "number": 69,
@@ -764,7 +764,7 @@ export const QUESTIONS = [
       "B": "坐地铁",
       "C": "走路"
     },
-    "audio": "audio/q069.mp3"
+    "audio": "q069.mp3"
   },
   {
     "number": 70,
@@ -775,7 +775,7 @@ export const QUESTIONS = [
       "B": "喝咖啡",
       "C": "买东西"
     },
-    "audio": "audio/q070.mp3"
+    "audio": "q070.mp3"
   },
   {
     "number": 71,
@@ -786,7 +786,7 @@ export const QUESTIONS = [
       "B": "后面",
       "C": "左边"
     },
-    "audio": "audio/q071.mp3"
+    "audio": "q071.mp3"
   },
   {
     "number": 72,
@@ -797,7 +797,7 @@ export const QUESTIONS = [
       "B": "银行左边",
       "C": "银行前面"
     },
-    "audio": "audio/q072.mp3"
+    "audio": "q072.mp3"
   },
   {
     "number": 73,
@@ -808,7 +808,7 @@ export const QUESTIONS = [
       "B": "后面",
       "C": "右边"
     },
-    "audio": "audio/q073.mp3"
+    "audio": "q073.mp3"
   },
   {
     "number": 74,
@@ -819,7 +819,7 @@ export const QUESTIONS = [
       "B": "坐公共汽车",
       "C": "坐飞机"
     },
-    "audio": "audio/q074.mp3"
+    "audio": "q074.mp3"
   },
   {
     "number": 75,
@@ -830,7 +830,7 @@ export const QUESTIONS = [
       "B": "坐公共汽车",
       "C": "走路"
     },
-    "audio": "audio/q075.mp3"
+    "audio": "q075.mp3"
   },
   {
     "number": 76,
@@ -841,7 +841,7 @@ export const QUESTIONS = [
       "B": "16元5角",
       "C": "15元6角"
     },
-    "audio": "audio/q076.mp3"
+    "audio": "q076.mp3"
   },
   {
     "number": 77,
@@ -852,7 +852,7 @@ export const QUESTIONS = [
       "B": "两杯",
       "C": "三杯"
     },
-    "audio": "audio/q077.mp3"
+    "audio": "q077.mp3"
   },
   {
     "number": 78,
@@ -863,7 +863,7 @@ export const QUESTIONS = [
       "B": "下午三点",
       "C": "下午五点"
     },
-    "audio": "audio/q078.mp3"
+    "audio": "q078.mp3"
   },
   {
     "number": 79,
@@ -874,7 +874,7 @@ export const QUESTIONS = [
       "B": "茶",
       "C": "水"
     },
-    "audio": "audio/q079.mp3"
+    "audio": "q079.mp3"
   },
   {
     "number": 80,
@@ -885,7 +885,7 @@ export const QUESTIONS = [
       "B": "20元",
       "C": "30元"
     },
-    "audio": "audio/q080.mp3"
+    "audio": "q080.mp3"
   },
   {
     "number": 81,
@@ -896,7 +896,7 @@ export const QUESTIONS = [
       "B": "8元",
       "C": "8元5角"
     },
-    "audio": "audio/q081.mp3"
+    "audio": "q081.mp3"
   },
   {
     "number": 82,
@@ -907,7 +907,7 @@ export const QUESTIONS = [
       "B": "没吃",
       "C": "不知道"
     },
-    "audio": "audio/q082.mp3"
+    "audio": "q082.mp3"
   },
   {
     "number": 83,
@@ -918,7 +918,7 @@ export const QUESTIONS = [
       "B": "医院",
       "C": "南京路"
     },
-    "audio": "audio/q083.mp3"
+    "audio": "q083.mp3"
   },
   {
     "number": 84,
@@ -929,7 +929,7 @@ export const QUESTIONS = [
       "B": "试衣服",
       "C": "去医院"
     },
-    "audio": "audio/q084.mp3"
+    "audio": "q084.mp3"
   },
   {
     "number": 85,
@@ -940,7 +940,7 @@ export const QUESTIONS = [
       "B": "坐公共汽车",
       "C": "走路"
     },
-    "audio": "audio/q085.mp3"
+    "audio": "q085.mp3"
   },
   {
     "number": 86,
@@ -951,7 +951,7 @@ export const QUESTIONS = [
       "B": "往右",
       "C": "往前"
     },
-    "audio": "audio/q086.mp3"
+    "audio": "q086.mp3"
   },
   {
     "number": 87,
@@ -962,7 +962,7 @@ export const QUESTIONS = [
       "B": "16元",
       "C": "17元"
     },
-    "audio": "audio/q087.mp3"
+    "audio": "q087.mp3"
   },
   {
     "number": 88,
@@ -973,7 +973,7 @@ export const QUESTIONS = [
       "B": "冰咖啡",
       "C": "热茶"
     },
-    "audio": "audio/q088.mp3"
+    "audio": "q088.mp3"
   },
   {
     "number": 89,
@@ -984,7 +984,7 @@ export const QUESTIONS = [
       "B": "女的",
       "C": "女的的朋友"
     },
-    "audio": "audio/q089.mp3"
+    "audio": "q089.mp3"
   },
   {
     "number": 90,
@@ -995,7 +995,7 @@ export const QUESTIONS = [
       "B": "多喝咖啡",
       "C": "去买东西"
     },
-    "audio": "audio/q090.mp3"
+    "audio": "q090.mp3"
   },
   {
     "number": 91,
@@ -1006,7 +1006,7 @@ export const QUESTIONS = [
       "B": "买咖啡",
       "C": "看医生"
     },
-    "audio": "audio/q091.mp3"
+    "audio": "q091.mp3"
   },
   {
     "number": 92,
@@ -1017,7 +1017,7 @@ export const QUESTIONS = [
       "B": "26元5角",
       "C": "25元6角"
     },
-    "audio": "audio/q092.mp3"
+    "audio": "q092.mp3"
   },
   {
     "number": 93,
@@ -1028,7 +1028,7 @@ export const QUESTIONS = [
       "B": "银行右边",
       "C": "银行后面"
     },
-    "audio": "audio/q093.mp3"
+    "audio": "q093.mp3"
   },
   {
     "number": 94,
@@ -1039,7 +1039,7 @@ export const QUESTIONS = [
       "B": "今天下午两点",
       "C": "明天下午两点"
     },
-    "audio": "audio/q094.mp3"
+    "audio": "q094.mp3"
   },
   {
     "number": 95,
@@ -1050,7 +1050,7 @@ export const QUESTIONS = [
       "B": "那个",
       "C": "两个"
     },
-    "audio": "audio/q095.mp3"
+    "audio": "q095.mp3"
   },
   {
     "number": 96,
@@ -1061,7 +1061,7 @@ export const QUESTIONS = [
       "B": "咖啡",
       "C": "牛奶"
     },
-    "audio": "audio/q096.mp3"
+    "audio": "q096.mp3"
   },
   {
     "number": 97,
@@ -1072,7 +1072,7 @@ export const QUESTIONS = [
       "B": "试鞋",
       "C": "看医生"
     },
-    "audio": "audio/q097.mp3"
+    "audio": "q097.mp3"
   },
   {
     "number": 98,
@@ -1083,7 +1083,7 @@ export const QUESTIONS = [
       "B": "因为感冒了",
       "C": "因为没有钱"
     },
-    "audio": "audio/q098.mp3"
+    "audio": "q098.mp3"
   },
   {
     "number": 99,
@@ -1094,7 +1094,7 @@ export const QUESTIONS = [
       "B": "不远",
       "C": "不知道"
     },
-    "audio": "audio/q099.mp3"
+    "audio": "q099.mp3"
   },
   {
     "number": 100,
@@ -1105,6 +1105,6 @@ export const QUESTIONS = [
       "B": "下午三点",
       "C": "下午五点"
     },
-    "audio": "audio/q100.mp3"
+    "audio": "q100.mp3"
   }
 ];
