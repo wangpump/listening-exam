@@ -1,24 +1,39 @@
 import { CONFIG } from './config.mjs';
-import { QUESTIONS, SECTION_TITLES } from './questions.mjs';
+
+import {
+  QUESTIONS,
+  SECTION_TITLES
+} from './questions.mjs';
+
+import {
+  QUESTION_STARTS_MS,
+  EXAM_END_MS,
+  answerLockOffsetMs,
+  timelinePosition
+} from './timing.mjs';
 
 import {
   normalizeIdentity,
   retryAsync,
   jitterMs,
-  createSubmissionId,
-  makeDeadline,
-  remainingSeconds
+  createSubmissionId
 } from './exam-core.mjs';
 
 
 const app =
-  document.getElementById('app');
+  document.getElementById(
+    'app'
+  );
 
 const timerBox =
-  document.getElementById('timerBox');
+  document.getElementById(
+    'timerBox'
+  );
 
 document
-  .getElementById('examTitle')
+  .getElementById(
+    'examTitle'
+  )
   .textContent =
     CONFIG.EXAM_TITLE;
 
@@ -47,7 +62,8 @@ const serverConfigured =
   () =>
     /^https:\/\/script\.google\.com\/.+\/exec/
       .test(
-        CONFIG.GOOGLE_APPS_SCRIPT_URL
+        CONFIG
+          .GOOGLE_APPS_SCRIPT_URL
       );
 
 
@@ -65,6 +81,9 @@ function freshState() {
     startedAt:
       null,
 
+    timelineStartedAt:
+      null,
+
     currentQuestion:
       1,
 
@@ -78,13 +97,7 @@ function freshState() {
       null,
 
     sectionNumber:
-      1,
-
-    sectionPrepEndsAt:
-      null,
-
-    sectionStartedAt:
-      null
+      1
   };
 }
 
@@ -124,7 +137,9 @@ function loadState() {
 function saveState() {
   localStorage.setItem(
     CONFIG.STORAGE_KEY,
-    JSON.stringify(state)
+    JSON.stringify(
+      state
+    )
   );
 }
 
@@ -159,8 +174,26 @@ function elapsedSeconds() {
         new Date(
           state.startedAt
         ).getTime()
-      ) / 1000
+      ) /
+      1000
     )
+  );
+}
+
+
+function timelineElapsedMs() {
+  if (
+    !state.timelineStartedAt
+  ) {
+    return 0;
+  }
+
+  return Math.max(
+    0,
+    Date.now() -
+      Number(
+        state.timelineStartedAt
+      )
   );
 }
 
@@ -248,7 +281,8 @@ async function postToServer(
     async () => {
       const response =
         await fetchWithTimeout(
-          CONFIG.GOOGLE_APPS_SCRIPT_URL,
+          CONFIG
+            .GOOGLE_APPS_SCRIPT_URL,
           {
             method:
               'POST',
@@ -335,7 +369,8 @@ async function checkDuplicate(
 ) {
   await sleep(
     jitterMs(
-      CONFIG.START_STAGGER_MAX_MS
+      CONFIG
+        .START_STAGGER_MAX_MS
     )
   );
 
@@ -381,27 +416,27 @@ function renderLogin(
     </h2>
 
     <p class="lead">
-      本考试共五大题、100小题，
-      每题1分。
-      听力音频由监考老师在教室统一播放，
-      学生网页不播放任何声音。
+      本考试共五大题、100小题，每题1分。
+      听力音频由监考老师统一播放，
+      学生网页不播放声音。
     </p>
 
     <div class="notice">
-      <strong>考试规则：</strong>
+      <strong>重要：</strong>
 
-      每道题从出现开始只有
-      <strong>10秒</strong>，
-      时间到后答案立即锁定并自动进入下一题。
+      本网页已经按照教师使用的
+      “学生端同步版”
+      完整听力音频逐题校准。
 
-      第一大题开始前准备
-      <strong>15秒</strong>。
+      每道题的显示时间随实际音频长度变化，
+      不再固定为10秒。
 
-      第一大题结束后，
-      后续各大题均自动等待
-      <strong>15秒</strong>
-      后开始，
-      不需要再次点击。
+      普通题答题结束后约2秒进入下一题；
+
+      每20题结束后自动进入15秒大题准备时间。
+
+      整场考试只在第一大题开始前
+      点击一次“开始考试”。
     </div>
 
     ${
@@ -422,6 +457,7 @@ function renderLogin(
     >
       <label>
         学号
+
         <input
           id="studentId"
           autocomplete="off"
@@ -431,6 +467,7 @@ function renderLogin(
 
       <label>
         English Name
+
         <input
           id="englishName"
           autocomplete="off"
@@ -440,6 +477,7 @@ function renderLogin(
 
       <label>
         中文姓名
+
         <input
           id="chineseName"
           autocomplete="off"
@@ -529,19 +567,6 @@ function renderLogin(
             identity;
 
 
-          state.startedAt =
-            new Date()
-              .toISOString();
-
-
-          state.currentQuestion =
-            1;
-
-
-          state.sectionNumber =
-            1;
-
-
           state.submissionId =
             createSubmissionId(
               globalThis.crypto
@@ -570,9 +595,6 @@ function renderLogin(
 
 /*
   第一大题开始页面
-
-  整场考试只有这里
-  有一次“开始考试”按钮。
 */
 function renderSectionIntro() {
   flowToken += 1;
@@ -584,14 +606,6 @@ function renderSectionIntro() {
 
   state.sectionNumber =
     1;
-
-
-  state.sectionPrepEndsAt =
-    null;
-
-
-  state.sectionStartedAt =
-    null;
 
 
   saveState();
@@ -614,46 +628,57 @@ function renderSectionIntro() {
     </h2>
 
     <p class="lead">
-      第一大题共20题
-      （第1—20题），
-      每题10秒。
+      第一大题为第1—20题。
+      开始后整个考试会按照教师播放的完整音频自动推进。
     </p>
 
     <div class="notice">
-      请等待监考老师统一指令。
+      <strong>同步方法：</strong>
 
-      点击下面按钮后进入
+      请等待监考老师统一倒数。
+
+      老师开始播放
       <strong>
-        15秒准备倒计时
-      </strong>。
+        “期末听力考试_100题_学生端同步版.mp3”
+      </strong>
+      的同时，
 
-      倒计时结束后，
-      第1题自动出现。
+      全班学生点击下面的
+      “开始考试”。
 
-      此后整个考试自动连续进行：
+      音频开头已经包含15秒准备时间。
 
-      每题10秒，
-      每20题结束后自动等待15秒进入下一大题，
-      不需要再次点击任何开始按钮。
+      此后第1—100题、
+      2秒普通题间隔以及
+      每大题15秒准备时间都会自动同步，
+
+      不再点击任何按钮。
     </div>
 
     <div class="identity-summary">
       <div>
         <small>学号</small>
+
         ${escapeHtml(
           state.identity.studentId
         )}
       </div>
 
       <div>
-        <small>English Name</small>
+        <small>
+          English Name
+        </small>
+
         ${escapeHtml(
           state.identity.englishName
         )}
       </div>
 
       <div>
-        <small>中文姓名</small>
+        <small>
+          中文姓名
+        </small>
+
         ${escapeHtml(
           state.identity.chineseName
         )}
@@ -665,7 +690,7 @@ function renderSectionIntro() {
         id="startSection"
         class="primary"
       >
-        开始考试（15秒准备）
+        开始考试
       </button>
     </div>
   `;
@@ -677,12 +702,31 @@ function renderSectionIntro() {
     )
     .addEventListener(
       'click',
-      () =>
-        beginSectionPrep(
-          1,
-          true,
-          Date.now()
-        ),
+      () => {
+        const now =
+          Date.now();
+
+
+        state.timelineStartedAt =
+          now;
+
+
+        state.startedAt =
+          new Date(
+            now
+          )
+            .toISOString();
+
+
+        state.phase =
+          'running';
+
+
+        saveState();
+
+
+        runTimeline();
+      },
       {
         once:
           true
@@ -692,18 +736,18 @@ function renderSectionIntro() {
 
 
 /*
-  大题之间15秒准备页面
-
-  第一大题：
-  学生点击一次后进入。
-
-  第二至第五大题：
-  上一大题结束后自动进入。
+  大题准备页面
 */
-function renderSectionPrep(
+function renderPrep(
   sectionNumber,
-  seconds
+  seconds,
+  initial = false
 ) {
+  timerBox.classList.add(
+    'hidden'
+  );
+
+
   const start =
     (
       sectionNumber -
@@ -716,11 +760,6 @@ function renderSectionPrep(
   const end =
     sectionNumber *
     20;
-
-
-  timerBox.classList.add(
-    'hidden'
-  );
 
 
   app.innerHTML = `
@@ -738,14 +777,21 @@ function renderSectionPrep(
     </h2>
 
     <div class="notice">
-      第${sectionNumber}大题为
-      第${start}—${end}题。
-
-      请准备听监考老师统一播放的音频。
+      ${
+        initial
+          ? `
+            同步音频已经开始播放，
+            目前为开场准备时间。
+          `
+          : `
+            第${sectionNumber}大题为
+            第${start}—${end}题。
+          `
+      }
 
       倒计时结束后，
-      本大题将
-      <strong>自动开始</strong>，
+      本大题将自动开始，
+
       无需点击任何按钮。
     </div>
 
@@ -776,127 +822,11 @@ function renderSectionPrep(
 
 
 /*
-  开始15秒准备倒计时
-
-  baseTimeMs 用于保证
-  第二至第五大题按照上一大题
-  的绝对结束时间计算，
-  不会因为浏览器稍有延迟
-  而逐渐错位。
+  显示正在答题的页面
 */
-async function beginSectionPrep(
-  sectionNumber,
-  resetDeadline,
-  baseTimeMs =
-    Date.now()
-) {
-  const token =
-    ++flowToken;
-
-
-  state.phase =
-    'section-prep';
-
-
-  state.sectionNumber =
-    sectionNumber;
-
-
-  state.sectionStartedAt =
-    null;
-
-
-  if (
-    resetDeadline ||
-    !state.sectionPrepEndsAt
-  ) {
-    state.sectionPrepEndsAt =
-      makeDeadline(
-        CONFIG
-          .SECTION_PREP_SECONDS,
-        baseTimeMs
-      );
-  }
-
-
-  saveState();
-
-
-  while (
-    token ===
-    flowToken
-  ) {
-    const left =
-      remainingSeconds(
-        state
-          .sectionPrepEndsAt
-      );
-
-
-    renderSectionPrep(
-      sectionNumber,
-      left
-    );
-
-
-    if (
-      left <=
-      0
-    ) {
-      break;
-    }
-
-
-    await sleep(
-      200
-    );
-  }
-
-
-  if (
-    token !==
-    flowToken
-  ) {
-    return;
-  }
-
-
-  /*
-    下一大题第1题的时间，
-    从15秒准备结束的
-    绝对时间开始计算。
-
-    刷新网页不会重新获得15秒。
-  */
-  state.sectionStartedAt =
-    Number(
-      state.sectionPrepEndsAt
-    );
-
-
-  state.sectionPrepEndsAt =
-    null;
-
-
-  state.phase =
-    'question';
-
-
-  saveState();
-
-
-  startQuestion(
-    state.currentQuestion
-  );
-}
-
-
-/*
-  显示单题
-*/
-function renderQuestionShell(
+function renderQuestion(
   question,
-  secondsLeft
+  answerSecondsLeft
 ) {
   const sectionStart =
     (
@@ -924,6 +854,13 @@ function renderQuestionShell(
     100;
 
 
+  const savedAnswer =
+    state.answers[
+      question.number
+    ] ||
+    '';
+
+
   timerBox.classList.add(
     'hidden'
   );
@@ -934,7 +871,8 @@ function renderQuestionShell(
       <span>
         ${escapeHtml(
           SECTION_TITLES[
-            question.section - 1
+            question.section -
+            1
           ]
         )}
       </span>
@@ -973,7 +911,7 @@ function renderQuestionShell(
         id="countdown"
         class="countdown"
       >
-        ${secondsLeft}s
+        ${answerSecondsLeft}s
       </span>
     </div>
 
@@ -990,8 +928,186 @@ function renderQuestionShell(
           .map(
             letter => `
               <button
-                class="option"
+                class="option ${
+                  savedAnswer ===
+                  letter
+                    ? 'selected'
+                    : ''
+                }"
                 data-answer="${letter}"
+              >
+                <span
+                  class="option-letter"
+                >
+                  ${letter}
+                </span>
+
+                <span>
+                  ${escapeHtml(
+                    question
+                      .options[
+                        letter
+                      ]
+                  )}
+                </span>
+              </button>
+            `
+          )
+          .join('')
+      }
+    </div>
+  `;
+
+
+  const buttons =
+    [
+      ...document
+        .querySelectorAll(
+          '.option'
+        )
+    ];
+
+
+  buttons.forEach(
+    btn => {
+      btn.addEventListener(
+        'click',
+        () => {
+          state.answers[
+            question.number
+          ] =
+            btn.dataset.answer;
+
+
+          saveState();
+
+
+          buttons.forEach(
+            b =>
+              b.classList.toggle(
+                'selected',
+                b === btn
+              )
+          );
+        }
+      );
+    }
+  );
+}
+
+
+/*
+  普通2秒题间隔：
+  答案锁定，不再允许修改。
+*/
+function renderLockedQuestion(
+  question,
+  secondsToNext
+) {
+  const sectionStart =
+    (
+      question.section -
+      1
+    ) *
+      20 +
+    1;
+
+
+  const withinSection =
+    question.number -
+    sectionStart +
+    1;
+
+
+  const progressPct =
+    (
+      (
+        question.number -
+        1
+      ) /
+      QUESTIONS.length
+    ) *
+    100;
+
+
+  const savedAnswer =
+    state.answers[
+      question.number
+    ] ||
+    '';
+
+
+  timerBox.classList.add(
+    'hidden'
+  );
+
+
+  app.innerHTML = `
+    <div class="meta-row">
+      <span>
+        ${escapeHtml(
+          SECTION_TITLES[
+            question.section -
+            1
+          ]
+        )}
+      </span>
+
+      <strong>
+        ${question.number} / 100
+      </strong>
+    </div>
+
+    <div class="progress">
+      <div
+        style="width:${progressPct}%"
+      ></div>
+    </div>
+
+    <div class="question-number">
+      第 ${question.number} 题
+      ·
+      本大题第
+      ${withinSection} / 20
+      题
+    </div>
+
+    <div class="prompt">
+      ${escapeHtml(
+        question.prompt
+      )}
+    </div>
+
+    <div class="audio-status">
+      <strong>
+        答案已锁定
+      </strong>
+
+      <span
+        id="gapCountdown"
+        class="countdown"
+      >
+        ${secondsToNext}s
+      </span>
+    </div>
+
+    <div class="options">
+      ${
+        [
+          'A',
+          'B',
+          'C'
+        ]
+          .map(
+            letter => `
+              <button
+                class="option ${
+                  savedAnswer ===
+                  letter
+                    ? 'selected'
+                    : ''
+                }"
+                disabled
               >
                 <span
                   class="option-letter"
@@ -1017,323 +1133,369 @@ function renderQuestionShell(
 }
 
 
-/*
-  当前题绝对结束时间
-*/
-function questionDeadline(
-  question
-) {
-  const sectionStartNumber =
-    (
-      question.section -
-      1
-    ) *
-      20 +
-    1;
-
-
-  const withinSection =
-    question.number -
-    sectionStartNumber +
-    1;
-
-
-  return (
-    Number(
-      state.sectionStartedAt
-    ) +
-    withinSection *
-      CONFIG
-        .QUESTION_SECONDS *
-      1000
+function ceilSeconds(ms) {
+  return Math.max(
+    0,
+    Math.ceil(
+      ms / 1000
+    )
   );
 }
 
 
 /*
-  开始单题
+  整个考试的核心同步时间轴
 */
-async function startQuestion(
-  number
-) {
-  if (
-    number >
-    100
-  ) {
-    return submitExam(
-      'completed'
-    );
-  }
-
-
-  const question =
-    QUESTIONS[
-      number -
-      1
-    ];
-
-
+async function runTimeline() {
   const token =
     ++flowToken;
 
 
-  state.phase =
-    'question';
-
-
-  state.currentQuestion =
-    number;
-
-
-  saveState();
-
-
-  let left =
-    remainingSeconds(
-      questionDeadline(
-        question
-      )
-    );
-
-
-  renderQuestionShell(
-    question,
-    left
-  );
-
-
-  const buttons =
-    [
-      ...document
-        .querySelectorAll(
-          '.option'
-        )
-    ];
-
-
-  const savedAnswer =
-    state.answers[
-      number
-    ] ||
+  let viewKey =
     '';
-
-
-  buttons.forEach(
-    btn => {
-      btn.classList.toggle(
-        'selected',
-        btn.dataset.answer ===
-          savedAnswer
-      );
-
-
-      btn.addEventListener(
-        'click',
-        () => {
-          if (
-            token !==
-            flowToken
-          ) {
-            return;
-          }
-
-
-          state.answers[
-            number
-          ] =
-            btn.dataset.answer;
-
-
-          saveState();
-
-
-          buttons.forEach(
-            b =>
-              b.classList.toggle(
-                'selected',
-                b === btn
-              )
-          );
-        }
-      );
-    }
-  );
 
 
   while (
     token ===
     flowToken
   ) {
-    left =
-      remainingSeconds(
-        questionDeadline(
-          question
-        )
+    const elapsed =
+      timelineElapsedMs();
+
+
+    const position =
+      timelinePosition(
+        elapsed
       );
-
-
-    const countdown =
-      document
-        .getElementById(
-          'countdown'
-        );
-
-
-    if (
-      countdown
-    ) {
-      countdown.textContent =
-        `${left}s`;
-    }
-
-
-    if (
-      left <=
-      0
-    ) {
-      break;
-    }
-
-
-    await sleep(
-      150
-    );
-  }
-
-
-  if (
-    token !==
-    flowToken
-  ) {
-    return;
-  }
-
-
-  if (
-    !(
-      number in
-      state.answers
-    )
-  ) {
-    state.answers[
-      number
-    ] =
-      '';
-  }
-
-
-  buttons.forEach(
-    btn => {
-      btn.disabled =
-        true;
-    }
-  );
-
-
-  saveState();
-
-
-  return advanceAfterQuestion(
-    number,
-    question
-  );
-}
-
-
-/*
-  单题结束后的处理
-*/
-async function advanceAfterQuestion(
-  number,
-  question
-) {
-  /*
-    第100题结束：
-    自动交卷
-  */
-  if (
-    number >=
-    100
-  ) {
-    state.currentQuestion =
-      101;
-
-    saveState();
-
-    return submitExam(
-      'completed'
-    );
-  }
-
-
-  const next =
-    number +
-    1;
-
-
-  state.currentQuestion =
-    next;
-
-
-  saveState();
-
-
-  /*
-    第20、40、60、80题结束：
-
-    不再显示下一大题的
-    “开始”按钮。
-
-    自动进入15秒准备时间。
-
-    15秒结束后，
-    下一大题自动开始。
-  */
-  if (
-    number %
-      20 ===
-    0
-  ) {
-    const nextSection =
-      question.section +
-      1;
 
 
     /*
-      使用上一大题最后一题
-      的绝对结束时间，
-      作为15秒间隔起点。
-
-      这样60名学生即使电脑
-      有轻微性能差异，
-      时间也不会逐渐漂移。
+      整个音频结束：
+      自动交卷
     */
-    const previousSectionEndAt =
-      questionDeadline(
-        question
+    if (
+      position.kind ===
+      'finished'
+    ) {
+      state.currentQuestion =
+        101;
+
+
+      state.phase =
+        'submitting';
+
+
+      saveState();
+
+
+      return submitExam(
+        'completed'
       );
+    }
 
 
-    return beginSectionPrep(
-      nextSection,
-      true,
-      previousSectionEndAt
+    /*
+      开场15秒准备
+    */
+    if (
+      position.kind ===
+      'initial-prep'
+    ) {
+      const key =
+        'initial-prep';
+
+
+      const remaining =
+        ceilSeconds(
+          QUESTION_STARTS_MS[0] -
+          elapsed
+        );
+
+
+      if (
+        viewKey !== key
+      ) {
+        state.phase =
+          'initial-prep';
+
+
+        state.currentQuestion =
+          1;
+
+
+        state.sectionNumber =
+          1;
+
+
+        saveState();
+
+
+        renderPrep(
+          1,
+          remaining,
+          true
+        );
+
+
+        viewKey =
+          key;
+
+      } else {
+        const el =
+          document
+            .getElementById(
+              'sectionCountdown'
+            );
+
+
+        if (
+          el
+        ) {
+          el.textContent =
+            remaining;
+        }
+      }
+    }
+
+
+    /*
+      正常答题阶段
+    */
+    if (
+      position.kind ===
+      'question'
+    ) {
+      const q =
+        position.question;
+
+
+      const key =
+        `question-${q}`;
+
+
+      const remaining =
+        ceilSeconds(
+          answerLockOffsetMs(q) -
+          elapsed
+        );
+
+
+      if (
+        viewKey !== key
+      ) {
+        state.phase =
+          'question';
+
+
+        state.currentQuestion =
+          q;
+
+
+        state.sectionNumber =
+          position.section;
+
+
+        if (
+          !(
+            q in
+            state.answers
+          )
+        ) {
+          state.answers[q] =
+            '';
+        }
+
+
+        saveState();
+
+
+        renderQuestion(
+          QUESTIONS[
+            q - 1
+          ],
+          remaining
+        );
+
+
+        viewKey =
+          key;
+
+      } else {
+        const el =
+          document
+            .getElementById(
+              'countdown'
+            );
+
+
+        if (
+          el
+        ) {
+          el.textContent =
+            `${remaining}s`;
+        }
+      }
+    }
+
+
+    /*
+      普通题后的2秒间隔
+    */
+    if (
+      position.kind ===
+      'gap'
+    ) {
+      const q =
+        position.question;
+
+
+      const key =
+        `gap-${q}`;
+
+
+      const remaining =
+        ceilSeconds(
+          QUESTION_STARTS_MS[q] -
+          elapsed
+        );
+
+
+      if (
+        viewKey !== key
+      ) {
+        state.phase =
+          'gap';
+
+
+        state.currentQuestion =
+          q;
+
+
+        state.sectionNumber =
+          position.section;
+
+
+        saveState();
+
+
+        renderLockedQuestion(
+          QUESTIONS[
+            q - 1
+          ],
+          remaining
+        );
+
+
+        viewKey =
+          key;
+
+      } else {
+        const el =
+          document
+            .getElementById(
+              'gapCountdown'
+            );
+
+
+        if (
+          el
+        ) {
+          el.textContent =
+            `${remaining}s`;
+        }
+      }
+    }
+
+
+    /*
+      第20、40、60、80题后：
+      进入15秒下一大题准备。
+    */
+    if (
+      position.kind ===
+      'section-prep'
+    ) {
+      const nextQuestion =
+        position.question;
+
+
+      const nextSection =
+        position.section;
+
+
+      const key =
+        `section-prep-${nextSection}`;
+
+
+      const remaining =
+        ceilSeconds(
+          QUESTION_STARTS_MS[
+            nextQuestion -
+            1
+          ] -
+          elapsed
+        );
+
+
+      if (
+        viewKey !== key
+      ) {
+        state.phase =
+          'section-prep';
+
+
+        state.currentQuestion =
+          nextQuestion;
+
+
+        state.sectionNumber =
+          nextSection;
+
+
+        saveState();
+
+
+        renderPrep(
+          nextSection,
+          remaining,
+          false
+        );
+
+
+        viewKey =
+          key;
+
+      } else {
+        const el =
+          document
+            .getElementById(
+              'sectionCountdown'
+            );
+
+
+        if (
+          el
+        ) {
+          el.textContent =
+            remaining;
+        }
+      }
+    }
+
+
+    /*
+      每100毫秒检查一次真实时间。
+      页面卡顿或刷新不会重新计算考试时间。
+    */
+    await sleep(
+      100
     );
   }
-
-
-  /*
-    普通题：
-    直接进入下一题
-  */
-  return startQuestion(
-    next
-  );
 }
 
 
 /*
-  提交考试
+  提交试卷
 */
 async function performSubmission(
   reason
@@ -1529,7 +1691,9 @@ function renderSubmissionError(
       <strong>
         答卷尚未成功上传
       </strong>
+
       <br>
+
       ${escapeHtml(
         message
       )}
@@ -1537,8 +1701,11 @@ function renderSubmissionError(
 
     <p class="lead">
       你的答案仍保存在当前浏览器中。
+
       请不要重新开始考试，
-      网络恢复后点击“重新提交”。
+
+      网络恢复后点击
+      “重新提交”。
     </p>
 
     <div class="actions">
@@ -1571,7 +1738,7 @@ function renderSubmissionError(
 
 
 /*
-  完成页面
+  已完成
 */
 function renderFinished() {
   state.phase =
@@ -1599,7 +1766,9 @@ function renderFinished() {
       <strong>
         你的试卷已经成功提交。
       </strong>
+
       <br>
+
       成绩已发送到教师成绩表，
       请关闭本页面。
     </div>
@@ -1607,6 +1776,7 @@ function renderFinished() {
     <div class="identity-summary">
       <div>
         <small>学号</small>
+
         ${escapeHtml(
           state.identity.studentId
         )}
@@ -1616,6 +1786,7 @@ function renderFinished() {
         <small>
           English Name
         </small>
+
         ${escapeHtml(
           state.identity.englishName
         )}
@@ -1625,6 +1796,7 @@ function renderFinished() {
         <small>
           中文姓名
         </small>
+
         ${escapeHtml(
           state.identity.chineseName
         )}
@@ -1635,11 +1807,11 @@ function renderFinished() {
 
 
 /*
-  刷新后恢复考试
+  刷新页面恢复
 */
 function resume() {
   if (
-    !state.startedAt ||
+    !state.identity ||
     state.phase ===
       'login'
   ) {
@@ -1669,63 +1841,36 @@ function resume() {
 
 
   /*
-    section-intro
-    只会出现在第一大题开始前。
+    尚未正式开始考试。
   */
   if (
-    state.phase ===
-    'section-intro'
+    !state.timelineStartedAt
   ) {
     return renderSectionIntro();
   }
 
 
   /*
-    如果刷新时处于15秒准备阶段，
-    继续原来的绝对倒计时，
-    不会重新获得15秒。
+    一旦开始考试，
+    刷新后继续跟随同一个绝对音频时间轴，
+    绝不重新计时。
   */
-  if (
-    state.phase ===
-    'section-prep'
-  ) {
-    return beginSectionPrep(
-      state.sectionNumber ||
-        1,
-      false
-    );
-  }
-
-
-  /*
-    如果刷新时正在答题，
-    继续当前题的绝对计时。
-  */
-  if (
-    state.phase ===
-    'question'
-  ) {
-    return startQuestion(
-      state.currentQuestion
-    );
-  }
-
-
-  return renderLogin();
+  return runTimeline();
 }
 
 
 /*
-  防止考试过程中误关闭页面
+  防止考试中误关闭页面
 */
 window.addEventListener(
   'beforeunload',
   event => {
     if (
-      state.startedAt &&
+      state.identity &&
       !state.submitted
     ) {
       event.preventDefault();
+
       event.returnValue =
         '';
     }
@@ -1734,6 +1879,6 @@ window.addEventListener(
 
 
 /*
-  页面启动
+  启动
 */
 resume();
