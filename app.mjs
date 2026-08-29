@@ -1,13 +1,5 @@
-import {
-  CONFIG
-} from './config.mjs';
-
-
-import {
-  QUESTIONS,
-  SECTION_TITLES
-} from './questions.mjs';
-
+import { CONFIG } from './config.mjs';
+import { QUESTIONS, SECTION_TITLES } from './questions.mjs';
 
 import {
   normalizeIdentity,
@@ -20,21 +12,13 @@ import {
 
 
 const app =
-  document.getElementById(
-    'app'
-  );
-
+  document.getElementById('app');
 
 const timerBox =
-  document.getElementById(
-    'timerBox'
-  );
-
+  document.getElementById('timerBox');
 
 document
-  .getElementById(
-    'examTitle'
-  )
+  .getElementById('examTitle')
   .textContent =
     CONFIG.EXAM_TITLE;
 
@@ -42,10 +26,8 @@ document
 let state =
   loadState();
 
-
 let flowToken =
   0;
-
 
 let submissionPromise =
   null;
@@ -65,8 +47,7 @@ const serverConfigured =
   () =>
     /^https:\/\/script\.google\.com\/.+\/exec/
       .test(
-        CONFIG
-          .GOOGLE_APPS_SCRIPT_URL
+        CONFIG.GOOGLE_APPS_SCRIPT_URL
       );
 
 
@@ -267,8 +248,7 @@ async function postToServer(
     async () => {
       const response =
         await fetchWithTimeout(
-          CONFIG
-            .GOOGLE_APPS_SCRIPT_URL,
+          CONFIG.GOOGLE_APPS_SCRIPT_URL,
           {
             method:
               'POST',
@@ -353,14 +333,9 @@ async function postToServer(
 async function checkDuplicate(
   studentId
 ) {
-  /*
-    60人同时进入考试时，
-    自动在0—7秒内错峰访问后台。
-  */
   await sleep(
     jitterMs(
-      CONFIG
-        .START_STAGGER_MAX_MS
+      CONFIG.START_STAGGER_MAX_MS
     )
   );
 
@@ -414,13 +389,19 @@ function renderLogin(
 
     <div class="notice">
       <strong>考试规则：</strong>
+
       每道题从出现开始只有
       <strong>10秒</strong>，
-      这10秒包括听音频和选择答案。
       时间到后答案立即锁定并自动进入下一题。
-      每个大题开始前有
-      <strong>45秒</strong>
-      准备时间。
+
+      第一大题开始前准备
+      <strong>15秒</strong>。
+
+      第一大题结束后，
+      后续各大题均自动等待
+      <strong>15秒</strong>
+      后开始，
+      不需要再次点击。
     </div>
 
     ${
@@ -575,9 +556,7 @@ function renderLogin(
           saveState();
 
 
-          renderSectionIntro(
-            1
-          );
+          renderSectionIntro();
 
         } catch (error) {
           renderLogin(
@@ -590,40 +569,32 @@ function renderLogin(
 
 
 /*
-  每个大题开始页面
+  第一大题开始页面
+
+  整场考试只有这里
+  有一次“开始考试”按钮。
 */
-function renderSectionIntro(
-  sectionNumber
-) {
+function renderSectionIntro() {
   flowToken += 1;
+
 
   state.phase =
     'section-intro';
 
+
   state.sectionNumber =
-    sectionNumber;
+    1;
+
 
   state.sectionPrepEndsAt =
     null;
 
+
   state.sectionStartedAt =
     null;
 
+
   saveState();
-
-
-  const start =
-    (
-      sectionNumber -
-      1
-    ) *
-      20 +
-    1;
-
-
-  const end =
-    sectionNumber *
-    20;
 
 
   timerBox.classList.add(
@@ -633,31 +604,37 @@ function renderSectionIntro(
 
   app.innerHTML = `
     <div class="section-kicker">
-      第 ${sectionNumber} / 5 部分
+      第 1 / 5 部分
     </div>
 
     <h2 class="section-title">
       ${escapeHtml(
-        SECTION_TITLES[
-          sectionNumber - 1
-        ]
+        SECTION_TITLES[0]
       )}
     </h2>
 
     <p class="lead">
-      第${sectionNumber}大题共20题
-      （第${start}—${end}题），
+      第一大题共20题
+      （第1—20题），
       每题10秒。
     </p>
 
     <div class="notice">
       请等待监考老师统一指令。
-      点击下面按钮后先进入
-      <strong>45秒准备倒计时</strong>，
-      倒计时结束后本大题第1题自动出现。
-      此后20题连续进行，
+
+      点击下面按钮后进入
+      <strong>
+        15秒准备倒计时
+      </strong>。
+
+      倒计时结束后，
+      第1题自动出现。
+
+      此后整个考试自动连续进行：
+
       每题10秒，
-      中途不停顿。
+      每20题结束后自动等待15秒进入下一大题，
+      不需要再次点击任何开始按钮。
     </div>
 
     <div class="identity-summary">
@@ -688,7 +665,7 @@ function renderSectionIntro(
         id="startSection"
         class="primary"
       >
-        开始第${sectionNumber}大题（45秒准备）
+        开始考试（15秒准备）
       </button>
     </div>
   `;
@@ -702,30 +679,54 @@ function renderSectionIntro(
       'click',
       () =>
         beginSectionPrep(
-          sectionNumber,
-          true
+          1,
+          true,
+          Date.now()
         ),
       {
-        once: true
+        once:
+          true
       }
     );
 }
 
 
 /*
-  45秒大题准备页面
+  大题之间15秒准备页面
+
+  第一大题：
+  学生点击一次后进入。
+
+  第二至第五大题：
+  上一大题结束后自动进入。
 */
 function renderSectionPrep(
   sectionNumber,
   seconds
 ) {
+  const start =
+    (
+      sectionNumber -
+      1
+    ) *
+      20 +
+    1;
+
+
+  const end =
+    sectionNumber *
+    20;
+
+
   timerBox.classList.add(
     'hidden'
   );
 
+
   app.innerHTML = `
     <div class="section-kicker">
-      第 ${sectionNumber} / 5 部分 · 准备时间
+      第 ${sectionNumber} / 5 部分
+      · 准备时间
     </div>
 
     <h2 class="section-title">
@@ -737,9 +738,15 @@ function renderSectionPrep(
     </h2>
 
     <div class="notice">
+      第${sectionNumber}大题为
+      第${start}—${end}题。
+
       请准备听监考老师统一播放的音频。
+
       倒计时结束后，
-      第${sectionNumber}大题将自动开始。
+      本大题将
+      <strong>自动开始</strong>，
+      无需点击任何按钮。
     </div>
 
     <div
@@ -762,18 +769,26 @@ function renderSectionPrep(
       class="lead"
       style="text-align:center;"
     >
-      秒后开始
+      秒后自动开始
     </p>
   `;
 }
 
 
 /*
-  开始45秒准备倒计时
+  开始15秒准备倒计时
+
+  baseTimeMs 用于保证
+  第二至第五大题按照上一大题
+  的绝对结束时间计算，
+  不会因为浏览器稍有延迟
+  而逐渐错位。
 */
 async function beginSectionPrep(
   sectionNumber,
-  resetDeadline
+  resetDeadline,
+  baseTimeMs =
+    Date.now()
 ) {
   const token =
     ++flowToken;
@@ -787,6 +802,10 @@ async function beginSectionPrep(
     sectionNumber;
 
 
+  state.sectionStartedAt =
+    null;
+
+
   if (
     resetDeadline ||
     !state.sectionPrepEndsAt
@@ -794,7 +813,8 @@ async function beginSectionPrep(
     state.sectionPrepEndsAt =
       makeDeadline(
         CONFIG
-          .SECTION_PREP_SECONDS
+          .SECTION_PREP_SECONDS,
+        baseTimeMs
       );
   }
 
@@ -820,7 +840,8 @@ async function beginSectionPrep(
 
 
     if (
-      left <= 0
+      left <=
+      0
     ) {
       break;
     }
@@ -841,11 +862,11 @@ async function beginSectionPrep(
 
 
   /*
-    第1题时间从45秒准备结束的
+    下一大题第1题的时间，
+    从15秒准备结束的
     绝对时间开始计算。
 
-    即使网页稍有延迟，
-    100名/60名学生的时间基准仍一致。
+    刷新网页不会重新获得15秒。
   */
   state.sectionStartedAt =
     Number(
@@ -930,8 +951,11 @@ function renderQuestionShell(
     </div>
 
     <div class="question-number">
-      第 ${question.number} 题 ·
-      本大题第 ${withinSection} / 20 题
+      第 ${question.number} 题
+      ·
+      本大题第
+      ${withinSection} / 20
+      题
     </div>
 
     <div class="prompt">
@@ -969,15 +993,18 @@ function renderQuestionShell(
                 class="option"
                 data-answer="${letter}"
               >
-                <span class="option-letter">
+                <span
+                  class="option-letter"
+                >
                   ${letter}
                 </span>
 
                 <span>
                   ${escapeHtml(
-                    question.options[
-                      letter
-                    ]
+                    question
+                      .options[
+                        letter
+                      ]
                   )}
                 </span>
               </button>
@@ -991,12 +1018,7 @@ function renderQuestionShell(
 
 
 /*
-  计算每一道题的绝对截止时间。
-
-  第1题：大题开始 + 10秒
-  第2题：大题开始 + 20秒
-  ...
-  第20题：大题开始 + 200秒
+  当前题绝对结束时间
 */
 function questionDeadline(
   question
@@ -1021,20 +1043,22 @@ function questionDeadline(
       state.sectionStartedAt
     ) +
     withinSection *
-      CONFIG.QUESTION_SECONDS *
+      CONFIG
+        .QUESTION_SECONDS *
       1000
   );
 }
 
 
 /*
-  单题10秒流程
+  开始单题
 */
 async function startQuestion(
   number
 ) {
   if (
-    number > 100
+    number >
+    100
   ) {
     return submitExam(
       'completed'
@@ -1044,7 +1068,8 @@ async function startQuestion(
 
   const question =
     QUESTIONS[
-      number - 1
+      number -
+      1
     ];
 
 
@@ -1086,15 +1111,11 @@ async function startQuestion(
     ];
 
 
-  /*
-    如果网页意外刷新，
-    当前题已有选择则恢复显示，
-    但不会重新获得时间。
-  */
   const savedAnswer =
     state.answers[
       number
-    ] || '';
+    ] ||
+    '';
 
 
   buttons.forEach(
@@ -1167,7 +1188,8 @@ async function startQuestion(
 
 
     if (
-      left <= 0
+      left <=
+      0
     ) {
       break;
     }
@@ -1201,9 +1223,10 @@ async function startQuestion(
 
 
   buttons.forEach(
-    btn =>
+    btn => {
       btn.disabled =
-        true
+        true;
+    }
   );
 
 
@@ -1211,19 +1234,26 @@ async function startQuestion(
 
 
   return advanceAfterQuestion(
-    number
+    number,
+    question
   );
 }
 
 
 /*
-  自动进入下一题 / 下一大题
+  单题结束后的处理
 */
 async function advanceAfterQuestion(
-  number
+  number,
+  question
 ) {
+  /*
+    第100题结束：
+    自动交卷
+  */
   if (
-    number >= 100
+    number >=
+    100
   ) {
     state.currentQuestion =
       101;
@@ -1237,7 +1267,8 @@ async function advanceAfterQuestion(
 
 
   const next =
-    number + 1;
+    number +
+    1;
 
 
   state.currentQuestion =
@@ -1248,31 +1279,53 @@ async function advanceAfterQuestion(
 
 
   /*
-    第20、40、60、80题结束以后，
-    回到下一大题准备页。
+    第20、40、60、80题结束：
 
-    下一大题不会自动立即开始，
-    需要老师再次统一让学生点击按钮，
-    然后进行45秒准备倒计时。
+    不再显示下一大题的
+    “开始”按钮。
+
+    自动进入15秒准备时间。
+
+    15秒结束后，
+    下一大题自动开始。
   */
   if (
-    (
-      next - 1
-    ) %
+    number %
       20 ===
     0
   ) {
-    return renderSectionIntro(
-      Math.floor(
-        (
-          next - 1
-        ) /
-          20
-      ) + 1
+    const nextSection =
+      question.section +
+      1;
+
+
+    /*
+      使用上一大题最后一题
+      的绝对结束时间，
+      作为15秒间隔起点。
+
+      这样60名学生即使电脑
+      有轻微性能差异，
+      时间也不会逐渐漂移。
+    */
+    const previousSectionEndAt =
+      questionDeadline(
+        question
+      );
+
+
+    return beginSectionPrep(
+      nextSection,
+      true,
+      previousSectionEndAt
     );
   }
 
 
+  /*
+    普通题：
+    直接进入下一题
+  */
   return startQuestion(
     next
   );
@@ -1280,7 +1333,7 @@ async function advanceAfterQuestion(
 
 
 /*
-  正式交卷
+  提交考试
 */
 async function performSubmission(
   reason
@@ -1341,13 +1394,16 @@ async function performSubmission(
     reason,
 
     studentId:
-      state.identity.studentId,
+      state.identity
+        .studentId,
 
     englishName:
-      state.identity.englishName,
+      state.identity
+        .englishName,
 
     chineseName:
-      state.identity.chineseName,
+      state.identity
+        .chineseName,
 
     startedAt:
       state.startedAt,
@@ -1364,7 +1420,8 @@ async function performSubmission(
         q =>
           state.answers[
             q.number
-          ] || ''
+          ] ||
+          ''
       ),
 
     userAgent:
@@ -1380,10 +1437,6 @@ async function performSubmission(
         'resume-submit';
 
 
-    /*
-      60人同时完成第100题时，
-      自动在0—12秒内错峰交卷。
-    */
     if (
       firstAttempt
     ) {
@@ -1466,7 +1519,7 @@ function submitExam(
 
 
 /*
-  交卷失败
+  提交失败
 */
 function renderSubmissionError(
   message
@@ -1510,14 +1563,15 @@ function renderSubmissionError(
           'retry-submit'
         ),
       {
-        once: true
+        once:
+          true
       }
     );
 }
 
 
 /*
-  提交成功页面
+  完成页面
 */
 function renderFinished() {
   state.phase =
@@ -1559,14 +1613,18 @@ function renderFinished() {
       </div>
 
       <div>
-        <small>English Name</small>
+        <small>
+          English Name
+        </small>
         ${escapeHtml(
           state.identity.englishName
         )}
       </div>
 
       <div>
-        <small>中文姓名</small>
+        <small>
+          中文姓名
+        </small>
         ${escapeHtml(
           state.identity.chineseName
         )}
@@ -1577,10 +1635,7 @@ function renderFinished() {
 
 
 /*
-  刷新/重新打开页面后的恢复逻辑。
-
-  45秒和每题10秒都使用绝对截止时间，
-  因此刷新网页不会获得额外时间。
+  刷新后恢复考试
 */
 function resume() {
   if (
@@ -1613,32 +1668,42 @@ function resume() {
   }
 
 
+  /*
+    section-intro
+    只会出现在第一大题开始前。
+  */
   if (
     state.phase ===
-      'section-intro'
+    'section-intro'
   ) {
-    return renderSectionIntro(
-      state.sectionNumber ||
-      1
-    );
+    return renderSectionIntro();
   }
 
 
+  /*
+    如果刷新时处于15秒准备阶段，
+    继续原来的绝对倒计时，
+    不会重新获得15秒。
+  */
   if (
     state.phase ===
-      'section-prep'
+    'section-prep'
   ) {
     return beginSectionPrep(
       state.sectionNumber ||
-      1,
+        1,
       false
     );
   }
 
 
+  /*
+    如果刷新时正在答题，
+    继续当前题的绝对计时。
+  */
   if (
     state.phase ===
-      'question'
+    'question'
   ) {
     return startQuestion(
       state.currentQuestion
@@ -1651,7 +1716,7 @@ function resume() {
 
 
 /*
-  防止考试过程中误关闭页面。
+  防止考试过程中误关闭页面
 */
 window.addEventListener(
   'beforeunload',
@@ -1661,7 +1726,6 @@ window.addEventListener(
       !state.submitted
     ) {
       event.preventDefault();
-
       event.returnValue =
         '';
     }
@@ -1669,4 +1733,7 @@ window.addEventListener(
 );
 
 
+/*
+  页面启动
+*/
 resume();
