@@ -1,10 +1,10 @@
 export const CONFIG = {
   EXAM_TITLE: '对外汉语初级期末听力考试',
 
-  // 每题总时间：听老师统一播放 + 选择答案，共10秒
+  // 每题答题时间
   QUESTION_SECONDS: 10,
 
-  // 每个大题开始前准备时间：15秒
+  // 每个大题之间准备时间
   SECTION_PREP_SECONDS: 15,
 
   // 最多60人同时登录时随机错峰
@@ -20,8 +20,8 @@ export const CONFIG = {
   GOOGLE_APPS_SCRIPT_URL:
     'https://script.google.com/macros/s/AKfycbytKVM6qE11BpRjK6jixJlzLrwXSbu7hehSD5U90FtQwmEK8NJ6PeymR6zh9gorohHVmQ/exec',
 
-  // 使用新的存储键，避免旧的45秒测试记录影响新版
-  STORAGE_KEY: 'pkru-listening-final-v3-15s',
+  // 使用新的存储键，避免之前45秒版本的测试记录干扰
+  STORAGE_KEY: 'pkru-listening-final-v3-auto-15s',
 
-  VERSION: '3.1.0'
+  VERSION: '3.2.0'
 };
