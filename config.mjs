@@ -4,8 +4,8 @@ export const CONFIG = {
   // 每题总时间：听老师统一播放 + 选择答案，共10秒
   QUESTION_SECONDS: 10,
 
-  // 每个大题开始前准备时间
-  SECTION_PREP_SECONDS: 45,
+  // 每个大题开始前准备时间：15秒
+  SECTION_PREP_SECONDS: 15,
 
   // 最多60人同时登录时随机错峰
   START_STAGGER_MAX_MS: 7000,
@@ -20,6 +20,8 @@ export const CONFIG = {
   GOOGLE_APPS_SCRIPT_URL:
     'https://script.google.com/macros/s/AKfycbytKVM6qE11BpRjK6jixJlzLrwXSbu7hehSD5U90FtQwmEK8NJ6PeymR6zh9gorohHVmQ/exec',
 
-  STORAGE_KEY: 'pkru-listening-final-v3-noaudio',
-  VERSION: '3.0.0'
+  // 使用新的存储键，避免旧的45秒测试记录影响新版
+  STORAGE_KEY: 'pkru-listening-final-v3-15s',
+
+  VERSION: '3.1.0'
 };
