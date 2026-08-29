@@ -1,75 +1,77 @@
-import { CONFIG } from './config.mjs';
+import {
+  CONFIG
+} from './config.mjs';
+
 
 import {
   QUESTIONS,
   SECTION_TITLES
 } from './questions.mjs';
 
+
 import {
   normalizeIdentity,
-  playExactlyTwice,
   retryAsync,
-  getSectionQuestions,
   jitterMs,
-  createSubmissionId
+  createSubmissionId,
+  makeDeadline,
+  remainingSeconds
 } from './exam-core.mjs';
 
 
 const app =
-  document.getElementById('app');
+  document.getElementById(
+    'app'
+  );
+
 
 const timerBox =
-  document.getElementById('timerBox');
-
-const timerEl =
-  document.getElementById('timer');
-
-
-document.getElementById(
-  'examTitle'
-).textContent = CONFIG.EXAM_TITLE;
+  document.getElementById(
+    'timerBox'
+  );
 
 
-let state = loadState();
-
-let timerHandle = null;
-
-let activeAudio = null;
-
-let questionRunToken = 0;
-
-let submissionPromise = null;
+document
+  .getElementById(
+    'examTitle'
+  )
+  .textContent =
+    CONFIG.EXAM_TITLE;
 
 
-/*
- questionNumber -> Blob object URL
+let state =
+  loadState();
 
- 每个大题开始之前，
- 音频先下载到浏览器内存。
 
- 正式播放时，
- 不再依赖实时网络。
-*/
-const audioCache = new Map();
+let flowToken =
+  0;
+
+
+let submissionPromise =
+  null;
 
 
 const sleep = (ms) =>
   new Promise(
-    resolve => setTimeout(resolve, ms)
+    resolve =>
+      setTimeout(
+        resolve,
+        ms
+      )
   );
 
 
-const serverConfigured = () =>
-  /^https:\/\/script\.google\.com\/.+\/exec/
-    .test(
-      CONFIG.GOOGLE_APPS_SCRIPT_URL
-    );
+const serverConfigured =
+  () =>
+    /^https:\/\/script\.google\.com\/.+\/exec/
+      .test(
+        CONFIG
+          .GOOGLE_APPS_SCRIPT_URL
+      );
 
 
 function freshState() {
-
   return {
-
     version:
       CONFIG.VERSION,
 
@@ -88,24 +90,26 @@ function freshState() {
     answers:
       {},
 
-    played:
-      {},
-
     submitted:
       false,
 
     submissionId:
+      null,
+
+    sectionNumber:
+      1,
+
+    sectionPrepEndsAt:
+      null,
+
+    sectionStartedAt:
       null
-
   };
-
 }
 
 
 function loadState() {
-
   try {
-
     const raw =
       localStorage.getItem(
         CONFIG.STORAGE_KEY
@@ -115,20 +119,15 @@ function loadState() {
       return freshState();
     }
 
-
     const parsed =
       JSON.parse(raw);
-
 
     if (
       parsed.version !==
       CONFIG.VERSION
     ) {
-
       return freshState();
-
     }
-
 
     return {
       ...freshState(),
@@ -136,26 +135,20 @@ function loadState() {
     };
 
   } catch {
-
     return freshState();
-
   }
-
 }
 
 
 function saveState() {
-
   localStorage.setItem(
     CONFIG.STORAGE_KEY,
     JSON.stringify(state)
   );
-
 }
 
 
 function escapeHtml(value) {
-
   return String(value)
     .replace(
       /[&<>'"]/g,
@@ -167,121 +160,15 @@ function escapeHtml(value) {
         '"': '&quot;'
       }[c])
     );
-
-}
-
-
-function startTimer() {
-
-  timerBox.classList.remove(
-    'hidden'
-  );
-
-
-  if (timerHandle) {
-
-    clearInterval(
-      timerHandle
-    );
-
-  }
-
-
-  const tick = async () => {
-
-    const elapsed =
-      Math.floor(
-        (
-          Date.now() -
-          new Date(
-            state.startedAt
-          ).getTime()
-        ) / 1000
-      );
-
-
-    const remaining =
-      Math.max(
-        0,
-        CONFIG.EXAM_MINUTES *
-        60 -
-        elapsed
-      );
-
-
-    const mm =
-      String(
-        Math.floor(
-          remaining / 60
-        )
-      ).padStart(
-        2,
-        '0'
-      );
-
-
-    const ss =
-      String(
-        remaining % 60
-      ).padStart(
-        2,
-        '0'
-      );
-
-
-    timerEl.textContent =
-      `${mm}:${ss}`;
-
-
-    if (
-      remaining <= 0
-    ) {
-
-      clearInterval(
-        timerHandle
-      );
-
-      timerHandle =
-        null;
-
-
-      questionRunToken += 1;
-
-
-      if (
-        activeAudio
-      ) {
-
-        activeAudio.pause();
-
-        activeAudio =
-          null;
-
-      }
-
-
-      await submitExam(
-        'time-expired'
-      );
-
-    }
-
-  };
-
-
-  tick();
-
-
-  timerHandle =
-    setInterval(
-      tick,
-      1000
-    );
-
 }
 
 
 function elapsedSeconds() {
+  if (
+    !state.startedAt
+  ) {
+    return 0;
+  }
 
   return Math.max(
     0,
@@ -294,7 +181,6 @@ function elapsedSeconds() {
       ) / 1000
     )
   );
-
 }
 
 
@@ -302,7 +188,6 @@ function makeRequestError(
   message,
   retryable = true
 ) {
-
   const error =
     new Error(message);
 
@@ -310,7 +195,6 @@ function makeRequestError(
     retryable;
 
   return error;
-
 }
 
 
@@ -320,10 +204,8 @@ async function fetchWithTimeout(
   timeoutMs =
     CONFIG.REQUEST_TIMEOUT_MS
 ) {
-
   const controller =
     new AbortController();
-
 
   const timer =
     setTimeout(
@@ -332,9 +214,7 @@ async function fetchWithTimeout(
       timeoutMs
     );
 
-
   try {
-
     return await fetch(
       url,
       {
@@ -345,18 +225,14 @@ async function fetchWithTimeout(
     );
 
   } catch (error) {
-
     if (
       error?.name ===
       'AbortError'
     ) {
-
       throw makeRequestError(
         '网络请求超时，请稍候重试'
       );
-
     }
-
 
     throw makeRequestError(
       error?.message ||
@@ -364,13 +240,10 @@ async function fetchWithTimeout(
     );
 
   } finally {
-
     clearTimeout(
       timer
     );
-
   }
-
 }
 
 
@@ -381,31 +254,22 @@ async function postToServer(
       CONFIG.SERVER_MAX_ATTEMPTS
   } = {}
 ) {
-
   if (
     !serverConfigured()
   ) {
-
     throw makeRequestError(
       'Google Apps Script 尚未配置',
       false
     );
-
   }
 
-
   return retryAsync(
-
     async () => {
-
       const response =
         await fetchWithTimeout(
-
           CONFIG
             .GOOGLE_APPS_SCRIPT_URL,
-
           {
-
             method:
               'POST',
 
@@ -424,73 +288,51 @@ async function postToServer(
 
             cache:
               'no-store'
-
           }
-
         );
-
 
       if (
         !response.ok
       ) {
-
         const retryable =
-          response.status === 429 ||
-          response.status >= 500;
-
+          response.status ===
+            429 ||
+          response.status >=
+            500;
 
         throw makeRequestError(
-
           `服务器响应异常：HTTP ${response.status}`,
-
           retryable
-
         );
-
       }
-
 
       let data;
 
-
       try {
-
         data =
           await response.json();
 
       } catch {
-
         throw makeRequestError(
           '服务器返回内容无法识别'
         );
-
       }
-
 
       if (
         !data.ok
       ) {
-
         throw makeRequestError(
-
           data.message ||
           '服务器拒绝了请求',
-
           Boolean(
             data.retryable
           )
-
         );
-
       }
 
-
       return data;
-
     },
-
     {
-
       maxAttempts,
 
       baseDelayMs:
@@ -503,30 +345,17 @@ async function postToServer(
         error =>
           error?.retryable !==
           false
-
     }
-
   );
-
 }
 
 
 async function checkDuplicate(
   studentId
 ) {
-
-  if (
-    !serverConfigured()
-  ) {
-
-    return false;
-
-  }
-
-
   /*
-   60人如果同时点击开始考试，
-   自动随机分散到约7秒内。
+    60人同时进入考试时，
+    自动在0—7秒内错峰访问后台。
   */
   await sleep(
     jitterMs(
@@ -534,7 +363,6 @@ async function checkDuplicate(
         .START_STAGGER_MAX_MS
     )
   );
-
 
   const data =
     await postToServer(
@@ -545,258 +373,28 @@ async function checkDuplicate(
         studentId
       },
       {
-        maxAttempts: 5
+        maxAttempts:
+          5
       }
     );
-
 
   return Boolean(
     data.attempted
   );
-
 }
 
 
-async function loadAudioBlobWithRetry(
-  question
-) {
-
-  if (
-    audioCache.has(
-      question.number
-    )
-  ) {
-
-    return audioCache.get(
-      question.number
-    );
-
-  }
-
-
-  const objectUrl =
-    await retryAsync(
-
-      async () => {
-
-        const response =
-          await fetchWithTimeout(
-
-            question.audio,
-
-            {
-
-              method:
-                'GET',
-
-              cache:
-                'force-cache',
-
-              credentials:
-                'same-origin'
-
-            },
-
-            15000
-
-          );
-
-
-        if (
-          !response.ok
-        ) {
-
-          throw makeRequestError(
-
-            `第${question.number}题音频下载失败：HTTP ${response.status}`
-
-          );
-
-        }
-
-
-        const blob =
-          await response.blob();
-
-
-        if (
-          !blob ||
-          blob.size < 500
-        ) {
-
-          throw makeRequestError(
-
-            `第${question.number}题音频文件无效`
-
-          );
-
-        }
-
-
-        return URL.createObjectURL(
-          blob
-        );
-
-      },
-
-      {
-
-        maxAttempts:
-          CONFIG
-            .AUDIO_FETCH_ATTEMPTS,
-
-        baseDelayMs:
-          450,
-
-        maxDelayMs:
-          3200
-
-      }
-
-    );
-
-
-  audioCache.set(
-    question.number,
-    objectUrl
-  );
-
-
-  return objectUrl;
-
-}
-
-
-async function runWithConcurrency(
-  items,
-  limit,
-  worker
-) {
-
-  let cursor = 0;
-
-
-  const workers =
-    Array.from(
-      {
-        length:
-          Math.min(
-            limit,
-            items.length
-          )
-      },
-      async () => {
-
-        while (
-          cursor <
-          items.length
-        ) {
-
-          const index =
-            cursor;
-
-          cursor += 1;
-
-
-          await worker(
-            items[index],
-            index
-          );
-
-        }
-
-      }
-    );
-
-
-  await Promise.all(
-    workers
-  );
-
-}
-
-
-async function preloadSectionAudio(
-  sectionNumber,
-  onProgress = () => {}
-) {
-
-  const questions =
-    getSectionQuestions(
-      QUESTIONS,
-      sectionNumber
-    );
-
-
-  let completed =
-    questions
-      .filter(
-        q =>
-          audioCache.has(
-            q.number
-          )
-      )
-      .length;
-
-
-  onProgress(
-    completed,
-    questions.length
-  );
-
-
-  const pending =
-    questions.filter(
-      q =>
-        !audioCache.has(
-          q.number
-        )
-    );
-
-
-  await runWithConcurrency(
-
-    pending,
-
-    CONFIG
-      .AUDIO_PRELOAD_CONCURRENCY,
-
-    async question => {
-
-      await loadAudioBlobWithRetry(
-        question
-      );
-
-
-      completed += 1;
-
-
-      onProgress(
-        completed,
-        questions.length
-      );
-
-    }
-
-  );
-
-
-  return true;
-
-}
-
-
+/*
+  登录页面
+*/
 function renderLogin(
   message = ''
 ) {
-
   timerBox.classList.add(
     'hidden'
   );
 
-
   app.innerHTML = `
-
     <div class="section-kicker">
       考试登录
     </div>
@@ -809,23 +407,29 @@ function renderLogin(
 
     <p class="lead">
       本考试共五大题、100小题，
-      每题1分，满分100分。
-      每道题的录音只播放两遍；
-      第二遍结束后只有5秒作答时间。
+      每题1分。
+      听力音频由监考老师在教室统一播放，
+      学生网页不播放任何声音。
     </p>
 
     <div class="notice">
-      <strong>重要：</strong>
-      考试开始后请勿刷新、关闭页面或切换设备。
-      系统会在每个大题开始前先完成音频缓存，
-      正式播放时不再依赖即时下载。
+      <strong>考试规则：</strong>
+      每道题从出现开始只有
+      <strong>10秒</strong>，
+      这10秒包括听音频和选择答案。
+      时间到后答案立即锁定并自动进入下一题。
+      每个大题开始前有
+      <strong>45秒</strong>
+      准备时间。
     </div>
 
     ${
       message
         ? `
           <div class="status-error">
-            ${escapeHtml(message)}
+            ${escapeHtml(
+              message
+            )}
           </div>
         `
         : ''
@@ -835,7 +439,6 @@ function renderLogin(
       id="loginForm"
       class="form-grid"
     >
-
       <label>
         学号
         <input
@@ -868,11 +471,9 @@ function renderLogin(
         id="startExamBtn"
         type="submit"
       >
-        确认信息并开始考试
+        确认信息并进入考试
       </button>
-
     </form>
-
   `;
 
 
@@ -881,33 +482,25 @@ function renderLogin(
       'loginForm'
     )
     .addEventListener(
-
       'submit',
-
       async event => {
-
         event.preventDefault();
 
-
         const btn =
-          document.getElementById(
-            'startExamBtn'
-          );
-
+          document
+            .getElementById(
+              'startExamBtn'
+            );
 
         btn.disabled =
           true;
 
-
         btn.textContent =
           '正在连接考试服务器…';
 
-
         try {
-
           const identity =
             normalizeIdentity({
-
               studentId:
                 document
                   .getElementById(
@@ -928,7 +521,6 @@ function renderLogin(
                     'chineseName'
                   )
                   .value
-
             });
 
 
@@ -937,15 +529,10 @@ function renderLogin(
               identity.studentId
             )
           ) {
-
             throw makeRequestError(
-
               '该学号已经提交过本次考试，请联系监考老师。',
-
               false
-
             );
-
           }
 
 
@@ -970,25 +557,22 @@ function renderLogin(
             1;
 
 
+          state.sectionNumber =
+            1;
+
+
           state.submissionId =
             createSubmissionId(
-
               globalThis.crypto
                 ?.randomUUID
-
                 ? () =>
                     globalThis.crypto
                       .randomUUID()
-
                 : null
-
             );
 
 
           saveState();
-
-
-          startTimer();
 
 
           renderSectionIntro(
@@ -996,27 +580,34 @@ function renderLogin(
           );
 
         } catch (error) {
-
           renderLogin(
             error.message
           );
-
         }
-
       }
-
     );
-
 }
 
 
+/*
+  每个大题开始页面
+*/
 function renderSectionIntro(
   sectionNumber
 ) {
+  flowToken += 1;
 
   state.phase =
     'section-intro';
 
+  state.sectionNumber =
+    sectionNumber;
+
+  state.sectionPrepEndsAt =
+    null;
+
+  state.sectionStartedAt =
+    null;
 
   saveState();
 
@@ -1025,15 +616,22 @@ function renderSectionIntro(
     (
       sectionNumber -
       1
-    ) * 20 + 1;
+    ) *
+      20 +
+    1;
 
 
   const end =
-    sectionNumber * 20;
+    sectionNumber *
+    20;
+
+
+  timerBox.classList.add(
+    'hidden'
+  );
 
 
   app.innerHTML = `
-
     <div class="section-kicker">
       第 ${sectionNumber} / 5 部分
     </div>
@@ -1049,29 +647,20 @@ function renderSectionIntro(
     <p class="lead">
       第${sectionNumber}大题共20题
       （第${start}—${end}题），
-      每题1分。
+      每题10秒。
     </p>
 
     <div class="notice">
-      系统正在准备本大题20段听力。
-      全部缓存完成后才可开始。
-      正式考试时，每题仍然只播放
-      <strong>两遍</strong>，
-      第二遍结束后开放选项并倒计时
-      <strong>5秒</strong>。
-    </div>
-
-    <div
-      id="preloadStatus"
-      class="audio-status"
-    >
-      <strong>
-        正在准备音频 0/20
-      </strong>
+      请等待监考老师统一指令。
+      点击下面按钮后先进入
+      <strong>45秒准备倒计时</strong>，
+      倒计时结束后本大题第1题自动出现。
+      此后20题连续进行，
+      每题10秒，
+      中途不停顿。
     </div>
 
     <div class="identity-summary">
-
       <div>
         <small>学号</small>
         ${escapeHtml(
@@ -1092,170 +681,209 @@ function renderSectionIntro(
           state.identity.chineseName
         )}
       </div>
-
     </div>
 
     <div class="actions">
-
       <button
         id="startSection"
         class="primary"
-        disabled
       >
-        音频准备中…
+        开始第${sectionNumber}大题（45秒准备）
       </button>
-
-      <button
-        id="retryPreload"
-        class="secondary hidden"
-        type="button"
-      >
-        重新准备音频
-      </button>
-
     </div>
-
   `;
 
 
-  const startButton =
-    document.getElementById(
+  document
+    .getElementById(
       'startSection'
-    );
-
-
-  const retryButton =
-    document.getElementById(
-      'retryPreload'
-    );
-
-
-  const statusBox =
-    document.getElementById(
-      'preloadStatus'
-    );
-
-
-  const prepare =
-    async () => {
-
-      startButton.disabled =
-        true;
-
-
-      startButton.textContent =
-        '音频准备中…';
-
-
-      retryButton.classList.add(
-        'hidden'
-      );
-
-
-      try {
-
-        await preloadSectionAudio(
-
+    )
+    .addEventListener(
+      'click',
+      () =>
+        beginSectionPrep(
           sectionNumber,
-
-          (
-            done,
-            total
-          ) => {
-
-            statusBox.innerHTML =
-              `<strong>正在准备音频 ${done}/${total}</strong>`;
-
-          }
-
-        );
-
-
-        statusBox.innerHTML =
-          '<strong>音频准备完成，可以开始本大题。</strong>';
-
-
-        startButton.disabled =
-          false;
-
-
-        startButton.textContent =
-          `开始第${sectionNumber}大题`;
-
-      } catch (error) {
-
-        statusBox.innerHTML =
-          `<strong>音频准备失败</strong><br>${escapeHtml(error.message)}。此时尚未播放任何题目，可以安全重试。`;
-
-
-        retryButton
-          .classList
-          .remove(
-            'hidden'
-          );
-
-      }
-
-    };
-
-
-  retryButton
-    .addEventListener(
-      'click',
-      prepare
-    );
-
-
-  startButton
-    .addEventListener(
-
-      'click',
-
-      () => {
-
-        if (
-          startButton.disabled
-        ) {
-
-          return;
-
-        }
-
-
-        state.phase =
-          'question';
-
-
-        saveState();
-
-
-        startQuestion(
-          state.currentQuestion
-        );
-
-      },
-
+          true
+        ),
       {
         once: true
       }
-
     );
-
-
-  prepare();
-
 }
 
 
-function renderQuestionShell(
-  question
+/*
+  45秒大题准备页面
+*/
+function renderSectionPrep(
+  sectionNumber,
+  seconds
 ) {
+  timerBox.classList.add(
+    'hidden'
+  );
 
+  app.innerHTML = `
+    <div class="section-kicker">
+      第 ${sectionNumber} / 5 部分 · 准备时间
+    </div>
+
+    <h2 class="section-title">
+      ${escapeHtml(
+        SECTION_TITLES[
+          sectionNumber - 1
+        ]
+      )}
+    </h2>
+
+    <div class="notice">
+      请准备听监考老师统一播放的音频。
+      倒计时结束后，
+      第${sectionNumber}大题将自动开始。
+    </div>
+
+    <div
+      class="audio-status"
+      style="
+        justify-content:center;
+        text-align:center;
+        padding:28px 0;
+      "
+    >
+      <strong
+        id="sectionCountdown"
+        style="font-size:48px;"
+      >
+        ${seconds}
+      </strong>
+    </div>
+
+    <p
+      class="lead"
+      style="text-align:center;"
+    >
+      秒后开始
+    </p>
+  `;
+}
+
+
+/*
+  开始45秒准备倒计时
+*/
+async function beginSectionPrep(
+  sectionNumber,
+  resetDeadline
+) {
+  const token =
+    ++flowToken;
+
+
+  state.phase =
+    'section-prep';
+
+
+  state.sectionNumber =
+    sectionNumber;
+
+
+  if (
+    resetDeadline ||
+    !state.sectionPrepEndsAt
+  ) {
+    state.sectionPrepEndsAt =
+      makeDeadline(
+        CONFIG
+          .SECTION_PREP_SECONDS
+      );
+  }
+
+
+  saveState();
+
+
+  while (
+    token ===
+    flowToken
+  ) {
+    const left =
+      remainingSeconds(
+        state
+          .sectionPrepEndsAt
+      );
+
+
+    renderSectionPrep(
+      sectionNumber,
+      left
+    );
+
+
+    if (
+      left <= 0
+    ) {
+      break;
+    }
+
+
+    await sleep(
+      200
+    );
+  }
+
+
+  if (
+    token !==
+    flowToken
+  ) {
+    return;
+  }
+
+
+  /*
+    第1题时间从45秒准备结束的
+    绝对时间开始计算。
+
+    即使网页稍有延迟，
+    100名/60名学生的时间基准仍一致。
+  */
+  state.sectionStartedAt =
+    Number(
+      state.sectionPrepEndsAt
+    );
+
+
+  state.sectionPrepEndsAt =
+    null;
+
+
+  state.phase =
+    'question';
+
+
+  saveState();
+
+
+  startQuestion(
+    state.currentQuestion
+  );
+}
+
+
+/*
+  显示单题
+*/
+function renderQuestionShell(
+  question,
+  secondsLeft
+) {
   const sectionStart =
     (
       question.section -
       1
-    ) * 20 + 1;
+    ) *
+      20 +
+    1;
 
 
   const withinSection =
@@ -1275,10 +903,13 @@ function renderQuestionShell(
     100;
 
 
+  timerBox.classList.add(
+    'hidden'
+  );
+
+
   app.innerHTML = `
-
     <div class="meta-row">
-
       <span>
         ${escapeHtml(
           SECTION_TITLES[
@@ -1290,7 +921,6 @@ function renderQuestionShell(
       <strong>
         ${question.number} / 100
       </strong>
-
     </div>
 
     <div class="progress">
@@ -1311,23 +941,22 @@ function renderQuestionShell(
     </div>
 
     <div class="audio-status">
-
-      <strong id="audioStatus">
-        准备播放
+      <strong>
+        请选择答案
       </strong>
 
       <span
         id="countdown"
         class="countdown"
-      ></span>
-
+      >
+        ${secondsLeft}s
+      </span>
     </div>
 
     <div
       id="options"
       class="options"
     >
-
       ${
         [
           'A',
@@ -1336,13 +965,10 @@ function renderQuestionShell(
         ]
           .map(
             letter => `
-
               <button
                 class="option"
                 data-answer="${letter}"
-                disabled
               >
-
                 <span class="option-letter">
                   ${letter}
                 </span>
@@ -1354,240 +980,65 @@ function renderQuestionShell(
                     ]
                   )}
                 </span>
-
               </button>
-
             `
           )
           .join('')
       }
-
     </div>
-
   `;
-
 }
 
 
-async function playAudioOnce(
-  question,
-  passNumber,
-  token
+/*
+  计算每一道题的绝对截止时间。
+
+  第1题：大题开始 + 10秒
+  第2题：大题开始 + 20秒
+  ...
+  第20题：大题开始 + 200秒
+*/
+function questionDeadline(
+  question
 ) {
-
-  if (
-    token !==
-    questionRunToken
-  ) {
-
-    return;
-
-  }
-
-
-  const cachedUrl =
-    audioCache.get(
-      question.number
-    );
-
-
-  if (
-    !cachedUrl
-  ) {
-
-    throw makeRequestError(
-
-      `第${question.number}题音频尚未缓存`,
-
-      false
-
-    );
-
-  }
-
-
-  const status =
-    document.getElementById(
-      'audioStatus'
-    );
-
-
-  status.textContent =
-    `第 ${passNumber} 遍播放中`;
-
-
-  activeAudio =
-    new Audio(
-      cachedUrl
-    );
-
-
-  activeAudio.preload =
-    'auto';
-
-
-  activeAudio.playsInline =
-    true;
-
-
-  await new Promise(
+  const sectionStartNumber =
     (
-      resolve,
-      reject
-    ) => {
-
-      const audio =
-        activeAudio;
-
-
-      let playbackStarted =
-        false;
+      question.section -
+      1
+    ) *
+      20 +
+    1;
 
 
-      const cleanup =
-        () => {
-
-          audio
-            .removeEventListener(
-              'ended',
-              onEnded
-            );
+  const withinSection =
+    question.number -
+    sectionStartNumber +
+    1;
 
 
-          audio
-            .removeEventListener(
-              'error',
-              onError
-            );
-
-        };
-
-
-      const onEnded =
-        () => {
-
-          cleanup();
-
-          resolve();
-
-        };
-
-
-      const onError =
-        () => {
-
-          cleanup();
-
-
-          reject(
-
-            makeRequestError(
-
-              playbackStarted
-
-                ? `第${question.number}题播放过程中发生设备音频错误`
-
-                : `第${question.number}题音频无法启动`,
-
-              false
-
-            )
-
-          );
-
-        };
-
-
-      audio.addEventListener(
-        'ended',
-        onEnded,
-        {
-          once: true
-        }
-      );
-
-
-      audio.addEventListener(
-        'error',
-        onError,
-        {
-          once: true
-        }
-      );
-
-
-      audio
-        .play()
-
-        .then(
-          () => {
-
-            playbackStarted =
-              true;
-
-
-            /*
-             只有真正开始播放后，
-             才标记该题已经使用播放机会。
-            */
-            if (
-              passNumber === 1 &&
-              !state.played[
-                question.number
-              ]
-            ) {
-
-              state.played[
-                question.number
-              ] =
-                true;
-
-
-              saveState();
-
-            }
-
-          }
-        )
-
-        .catch(
-          onError
-        );
-
-    }
+  return (
+    Number(
+      state.sectionStartedAt
+    ) +
+    withinSection *
+      CONFIG.QUESTION_SECONDS *
+      1000
   );
-
-
-  activeAudio =
-    null;
-
-
-  if (
-    passNumber === 1
-  ) {
-
-    await sleep(
-      CONFIG
-        .GAP_BETWEEN_PLAYS_MS
-    );
-
-  }
-
 }
 
 
+/*
+  单题10秒流程
+*/
 async function startQuestion(
   number
 ) {
-
   if (
     number > 100
   ) {
-
     return submitExam(
       'completed'
     );
-
   }
 
 
@@ -1595,6 +1046,10 @@ async function startQuestion(
     QUESTIONS[
       number - 1
     ];
+
+
+  const token =
+    ++flowToken;
 
 
   state.phase =
@@ -1605,199 +1060,67 @@ async function startQuestion(
     number;
 
 
-  renderQuestionShell(
-    question
-  );
+  saveState();
 
 
-  /*
-   如果已经真正播放过，
-   刷新页面不会获得重新播放机会。
-  */
-  if (
-    state.played[
-      number
-    ]
-  ) {
-
-    if (
-      !(
-        number in
-        state.answers
-      )
-    ) {
-
-      state.answers[
-        number
-      ] =
-        '';
-
-    }
-
-
-    saveState();
-
-
-    await sleep(
-      250
-    );
-
-
-    return advanceAfterQuestion(
-      number
-    );
-
-  }
-
-
-  const token =
-    ++questionRunToken;
-
-
-  try {
-
-    /*
-     理论上进入本大题时
-     已经缓存成功。
-
-     这里保留一道安全保护。
-    */
-    if (
-      !audioCache.has(
-        number
-      )
-    ) {
-
-      await loadAudioBlobWithRetry(
+  let left =
+    remainingSeconds(
+      questionDeadline(
         question
-      );
-
-    }
-
-
-    await playExactlyTwice(
-
-      pass =>
-        playAudioOnce(
-          question,
-          pass,
-          token
-        )
-
+      )
     );
 
 
-    if (
-      token !==
-      questionRunToken
-    ) {
-
-      return;
-
-    }
-
-
-    await openAnswerWindow(
-      question,
-      token
-    );
-
-  } catch (error) {
-
-    const spent =
-      Boolean(
-        state.played[
-          number
-        ]
-      );
-
-
-    app.innerHTML = `
-
-      <div class="status-error">
-
-        <strong>
-          音频播放异常
-        </strong>
-
-        <br>
-
-        ${escapeHtml(
-          error.message
-        )}。
-
-        ${
-          spent
-
-            ? '该题已经开始过播放，为保证公平不会重新播放。'
-
-            : '该题尚未开始发声，可以联系监考老师处理。'
-        }
-
-      </div>
-
-      <p class="lead">
-        题号：
-        ${question.number}
-      </p>
-
-    `;
-
-  }
-
-}
-
-
-async function openAnswerWindow(
-  question,
-  token
-) {
-
-  const status =
-    document.getElementById(
-      'audioStatus'
-    );
-
-
-  const countdown =
-    document.getElementById(
-      'countdown'
-    );
+  renderQuestionShell(
+    question,
+    left
+  );
 
 
   const buttons =
     [
-      ...document.querySelectorAll(
-        '.option'
-      )
+      ...document
+        .querySelectorAll(
+          '.option'
+        )
     ];
 
 
-  status.textContent =
-    '请选择答案';
+  /*
+    如果网页意外刷新，
+    当前题已有选择则恢复显示，
+    但不会重新获得时间。
+  */
+  const savedAnswer =
+    state.answers[
+      number
+    ] || '';
 
 
   buttons.forEach(
     btn => {
-
-      btn.disabled =
-        false;
+      btn.classList.toggle(
+        'selected',
+        btn.dataset.answer ===
+          savedAnswer
+      );
 
 
       btn.addEventListener(
-
         'click',
-
         () => {
-
-          const answer =
-            btn.dataset.answer;
+          if (
+            token !==
+            flowToken
+          ) {
+            return;
+          }
 
 
           state.answers[
-            question.number
+            number
           ] =
-            answer;
+            btn.dataset.answer;
 
 
           saveState();
@@ -1810,57 +1133,70 @@ async function openAnswerWindow(
                 b === btn
               )
           );
-
         }
-
       );
-
     }
   );
 
 
-  for (
-    let seconds =
-      CONFIG.ANSWER_SECONDS;
-
-    seconds >= 1;
-
-    seconds -= 1
+  while (
+    token ===
+    flowToken
   ) {
+    left =
+      remainingSeconds(
+        questionDeadline(
+          question
+        )
+      );
+
+
+    const countdown =
+      document
+        .getElementById(
+          'countdown'
+        );
+
 
     if (
-      token !==
-      questionRunToken
+      countdown
     ) {
-
-      return;
-
+      countdown.textContent =
+        `${left}s`;
     }
 
 
-    countdown.textContent =
-      `${seconds}s`;
+    if (
+      left <= 0
+    ) {
+      break;
+    }
 
 
     await sleep(
-      1000
+      150
     );
+  }
 
+
+  if (
+    token !==
+    flowToken
+  ) {
+    return;
   }
 
 
   if (
     !(
-      question.number in
+      number in
       state.answers
     )
   ) {
-
     state.answers[
-      question.number
+      number
     ] =
       '';
-
   }
 
 
@@ -1871,49 +1207,32 @@ async function openAnswerWindow(
   );
 
 
-  status.textContent =
-    '答案已锁定';
-
-
-  countdown.textContent =
-    '';
-
-
   saveState();
 
 
-  await sleep(
-    CONFIG
-      .GAP_BETWEEN_QUESTIONS_MS
-  );
-
-
   return advanceAfterQuestion(
-    question.number
+    number
   );
-
 }
 
 
+/*
+  自动进入下一题 / 下一大题
+*/
 async function advanceAfterQuestion(
   number
 ) {
-
   if (
     number >= 100
   ) {
-
     state.currentQuestion =
       101;
 
-
     saveState();
-
 
     return submitExam(
       'completed'
     );
-
   }
 
 
@@ -1928,100 +1247,72 @@ async function advanceAfterQuestion(
   saveState();
 
 
-  const nextSection =
-    Math.floor(
-      (
-        next - 1
-      ) /
-      20
-    ) +
-    1;
-
-
   /*
-   21、41、61、81
-   进入下一大题准备页面。
+    第20、40、60、80题结束以后，
+    回到下一大题准备页。
+
+    下一大题不会自动立即开始，
+    需要老师再次统一让学生点击按钮，
+    然后进行45秒准备倒计时。
   */
   if (
     (
       next - 1
     ) %
-    20 ===
+      20 ===
     0
   ) {
-
     return renderSectionIntro(
-      nextSection
+      Math.floor(
+        (
+          next - 1
+        ) /
+          20
+      ) + 1
     );
-
   }
 
 
   return startQuestion(
     next
   );
-
 }
 
 
+/*
+  正式交卷
+*/
 async function performSubmission(
   reason
 ) {
-
   state.phase =
     'submitting';
 
 
-  /*
-   submissionId整个考试过程中固定，
-   即使网络重试，也不会产生新的答卷编号。
-  */
   if (
     !state.submissionId
   ) {
-
     state.submissionId =
       createSubmissionId(
-
         globalThis.crypto
           ?.randomUUID
-
           ? () =>
               globalThis.crypto
                 .randomUUID()
-
           : null
-
       );
-
   }
 
 
   saveState();
 
 
-  if (
-    timerHandle
-  ) {
-
-    clearInterval(
-      timerHandle
-    );
-
-  }
-
-
-  timerHandle =
-    null;
-
-
-  timerBox.classList.remove(
+  timerBox.classList.add(
     'hidden'
   );
 
 
   app.innerHTML = `
-
     <div class="section-kicker">
       正在交卷
     </div>
@@ -2031,16 +1322,13 @@ async function performSubmission(
     </h2>
 
     <p class="lead">
-      系统正在安全排队提交答卷。
-      60人同时交卷时会自动错峰，
+      正在把答卷写入教师成绩表，
       请不要关闭页面。
     </p>
-
   `;
 
 
   const payload = {
-
     action:
       'submit',
 
@@ -2076,40 +1364,15 @@ async function performSubmission(
         q =>
           state.answers[
             q.number
-          ] ||
-          ''
+          ] || ''
       ),
 
     userAgent:
       navigator.userAgent
-
   };
 
 
   try {
-
-    if (
-      !serverConfigured()
-    ) {
-
-      throw makeRequestError(
-
-        '当前网页尚未配置 Google Apps Script 地址。',
-
-        false
-
-      );
-
-    }
-
-
-    /*
-     第一次交卷才随机错峰。
-
-     如果学生已经进入
-     手动“重新提交”，
-     不再重复等待。
-    */
     const firstAttempt =
       reason !==
         'retry-submit' &&
@@ -2117,31 +1380,29 @@ async function performSubmission(
         'resume-submit';
 
 
+    /*
+      60人同时完成第100题时，
+      自动在0—12秒内错峰交卷。
+    */
     if (
       firstAttempt
     ) {
-
       await sleep(
-
         jitterMs(
           CONFIG
             .SUBMIT_STAGGER_MAX_MS
         )
-
       );
-
     }
 
 
     const result =
       await postToServer(
-
         payload,
-
         {
-          maxAttempts: 5
+          maxAttempts:
+            5
         }
-
       );
 
 
@@ -2164,7 +1425,6 @@ async function performSubmission(
     renderFinished();
 
   } catch (error) {
-
     state.phase =
       'submission-error';
 
@@ -2175,26 +1435,17 @@ async function performSubmission(
     renderSubmissionError(
       error.message
     );
-
   }
-
 }
 
 
 function submitExam(
   reason
 ) {
-
-  /*
-   防止同一浏览器在同一时间
-   启动两个交卷请求。
-  */
   if (
     submissionPromise
   ) {
-
     return submissionPromise;
-
   }
 
 
@@ -2204,63 +1455,47 @@ function submitExam(
     )
       .finally(
         () => {
-
           submissionPromise =
             null;
-
         }
       );
 
 
   return submissionPromise;
-
 }
 
 
+/*
+  交卷失败
+*/
 function renderSubmissionError(
   message
 ) {
-
   app.innerHTML = `
-
     <div class="status-error">
-
       <strong>
         答卷尚未成功上传
       </strong>
-
       <br>
-
       ${escapeHtml(
         message
       )}
-
     </div>
 
     <p class="lead">
-
-      你的100题答案和固定提交编号
-      仍保存在当前浏览器中。
-
-      请不要重新考试；
-
-      网络恢复后点击“重新提交”，
-      系统会按同一份答卷继续提交，
-      不会重复记分。
-
+      你的答案仍保存在当前浏览器中。
+      请不要重新开始考试，
+      网络恢复后点击“重新提交”。
     </p>
 
     <div class="actions">
-
       <button
         id="retrySubmit"
         class="primary"
       >
         重新提交答卷
       </button>
-
     </div>
-
   `;
 
 
@@ -2269,45 +1504,27 @@ function renderSubmissionError(
       'retrySubmit'
     )
     .addEventListener(
-
       'click',
-
       () =>
         submitExam(
           'retry-submit'
         ),
-
       {
         once: true
       }
-
     );
-
 }
 
 
+/*
+  提交成功页面
+*/
 function renderFinished() {
-
   state.phase =
     'finished';
 
 
   saveState();
-
-
-  if (
-    timerHandle
-  ) {
-
-    clearInterval(
-      timerHandle
-    );
-
-  }
-
-
-  timerHandle =
-    null;
 
 
   timerBox.classList.add(
@@ -2316,7 +1533,6 @@ function renderFinished() {
 
 
   app.innerHTML = `
-
     <div class="section-kicker">
       SUBMITTED
     </div>
@@ -2326,20 +1542,15 @@ function renderFinished() {
     </h2>
 
     <div class="status-success">
-
       <strong>
         你的试卷已经成功提交。
       </strong>
-
       <br>
-
       成绩已发送到教师成绩表，
       请关闭本页面。
-
     </div>
 
     <div class="identity-summary">
-
       <div>
         <small>学号</small>
         ${escapeHtml(
@@ -2360,24 +1571,24 @@ function renderFinished() {
           state.identity.chineseName
         )}
       </div>
-
     </div>
-
   `;
-
 }
 
 
-function resume() {
+/*
+  刷新/重新打开页面后的恢复逻辑。
 
+  45秒和每题10秒都使用绝对截止时间，
+  因此刷新网页不会获得额外时间。
+*/
+function resume() {
   if (
     !state.startedAt ||
     state.phase ===
       'login'
   ) {
-
     return renderLogin();
-
   }
 
 
@@ -2386,29 +1597,7 @@ function resume() {
     state.phase ===
       'finished'
   ) {
-
     return renderFinished();
-
-  }
-
-
-  startTimer();
-
-
-  const elapsed =
-    elapsedSeconds();
-
-
-  if (
-    elapsed >=
-    CONFIG.EXAM_MINUTES *
-    60
-  ) {
-
-    return submitExam(
-      'time-expired'
-    );
-
   }
 
 
@@ -2418,11 +1607,9 @@ function resume() {
     state.phase ===
       'submitting'
   ) {
-
     return submitExam(
       'resume-submit'
     );
-
   }
 
 
@@ -2430,25 +1617,22 @@ function resume() {
     state.phase ===
       'section-intro'
   ) {
-
-    const section =
-      Math.min(
-        5,
-        Math.floor(
-          (
-            state.currentQuestion -
-            1
-          ) /
-          20
-        ) +
-        1
-      );
-
-
     return renderSectionIntro(
-      section
+      state.sectionNumber ||
+      1
     );
+  }
 
+
+  if (
+    state.phase ===
+      'section-prep'
+  ) {
+    return beginSectionPrep(
+      state.sectionNumber ||
+      1,
+      false
+    );
   }
 
 
@@ -2456,58 +1640,32 @@ function resume() {
     state.phase ===
       'question'
   ) {
-
     return startQuestion(
       state.currentQuestion
     );
-
   }
 
 
-  renderLogin();
-
+  return renderLogin();
 }
 
 
+/*
+  防止考试过程中误关闭页面。
+*/
 window.addEventListener(
-
   'beforeunload',
-
   event => {
-
     if (
       state.startedAt &&
       !state.submitted
     ) {
-
       event.preventDefault();
 
       event.returnValue =
         '';
-
     }
-
   }
-
-);
-
-
-window.addEventListener(
-
-  'pagehide',
-
-  () => {
-
-    if (
-      activeAudio
-    ) {
-
-      activeAudio.pause();
-
-    }
-
-  }
-
 );
 
 
