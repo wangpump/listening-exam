@@ -1,201 +1,234 @@
 export const QUESTION_STARTS_MS = Object.freeze([
-  15000,
-  28810,
-  42408,
-  55952,
-  69548,
-  83147,
-  96888,
-  110434,
-  124023,
-  137962,
-  151689,
-  165282,
-  178986,
-  193004,
-  207055,
-  221073,
-  235100,
-  249224,
-  262713,
-  275841,
-  303524,
-  318145,
-  334861,
-  351764,
-  368873,
-  386452,
-  403837,
-  418969,
-  435998,
-  450001,
-  465661,
-  481594,
-  497982,
-  513261,
-  530321,
-  546071,
-  562165,
-  579987,
-  595547,
-  611115,
-  639480,
-  666334,
-  686230,
-  712333,
-  734775,
-  756797,
-  777032,
-  798524,
-  818087,
-  837071,
-  857225,
-  877277,
-  897754,
-  917196,
-  936985,
-  963641,
-  984610,
-  1010381,
-  1031293,
-  1052872,
-  1089623,
-  1111589,
-  1131546,
-  1152068,
-  1174709,
-  1196736,
-  1218754,
-  1238838,
-  1259912,
-  1280991,
-  1305407,
-  1329727,
-  1350979,
-  1371839,
-  1392751,
-  1413199,
-  1432584,
-  1451052,
-  1471507,
-  1492964,
-  1528642,
-  1556208,
-  1581820,
-  1603221,
-  1631465,
-  1658646,
-  1688348,
-  1712245,
-  1739390,
-  1760404,
-  1782712,
-  1808464,
-  1828450,
-  1852056,
-  1873400,
-  1894025,
-  1914477,
-  1935417,
-  1956037,
-  1978434
+  16492,
+  31554,
+  46592,
+  61678,
+  76836,
+  91922,
+  107176,
+  122238,
+  137324,
+  152746,
+  168048,
+  183326,
+  198676,
+  214409,
+  230119,
+  245805,
+  261539,
+  277369,
+  292551,
+  307373,
+  341037,
+  357371,
+  375817,
+  394527,
+  413405,
+  432739,
+  451881,
+  468791,
+  487597,
+  503355,
+  520697,
+  538471,
+  556677,
+  573851,
+  592777,
+  610383,
+  628349,
+  648067,
+  665505,
+  682943,
+  717471,
+  746153,
+  767882,
+  795844,
+  820166,
+  844032,
+  866122,
+  889484,
+  910902,
+  931792,
+  953594,
+  975396,
+  997630,
+  1018880,
+  1040490,
+  1068932,
+  1091694,
+  1119252,
+  1141941,
+  1165351,
+  1208203,
+  1231973,
+  1253703,
+  1276081,
+  1300571,
+  1324389,
+  1348255,
+  1370201,
+  1393059,
+  1415989,
+  1442111,
+  1468233,
+  1491283,
+  1514021,
+  1536783,
+  1559041,
+  1580266,
+  1600580,
+  1622886,
+  1646200,
+  1687972,
+  1717374,
+  1744760,
+  1768002,
+  1798100,
+  1827118,
+  1858632,
+  1884390,
+  1913359,
+  1936193,
+  1960155,
+  1987709,
+  2009463,
+  2034889,
+  2058059,
+  2080485,
+  2102743,
+  2125529,
+  2147955,
+  2172205
 ]);
 
-// 实测同步版完整音频时长：33分25.342秒
-export const EXAM_END_MS = 2005342;
+export const ANSWER_LOCKS_MS = Object.freeze([
+  29554,
+  44592,
+  59678,
+  74836,
+  89922,
+  105176,
+  120238,
+  135324,
+  150746,
+  166048,
+  181326,
+  196676,
+  212409,
+  228119,
+  243805,
+  259539,
+  275369,
+  290551,
+  305373,
+  321659,
+  355371,
+  373817,
+  392527,
+  411405,
+  430739,
+  449881,
+  466791,
+  485597,
+  501355,
+  518697,
+  536471,
+  554677,
+  571851,
+  590777,
+  608383,
+  626349,
+  646067,
+  663505,
+  680943,
+  697997,
+  744153,
+  765882,
+  793844,
+  818166,
+  842032,
+  864122,
+  887484,
+  908902,
+  929792,
+  951594,
+  973396,
+  995630,
+  1016880,
+  1038490,
+  1066932,
+  1089694,
+  1117252,
+  1139941,
+  1163351,
+  1188753,
+  1229973,
+  1251703,
+  1274081,
+  1298571,
+  1322389,
+  1346255,
+  1368201,
+  1391059,
+  1413989,
+  1440111,
+  1466233,
+  1489283,
+  1512021,
+  1534783,
+  1557041,
+  1578266,
+  1598580,
+  1620886,
+  1644200,
+  1668546,
+  1715374,
+  1742760,
+  1766002,
+  1796100,
+  1825118,
+  1856632,
+  1882390,
+  1911359,
+  1934193,
+  1958155,
+  1985709,
+  2007463,
+  2032889,
+  2056059,
+  2078485,
+  2100743,
+  2123529,
+  2145955,
+  2170205,
+  2200835
+]);
 
-export const NORMAL_GAP_MS = 2000;
-export const SECTION_PREP_MS = 15000;
-
-export function questionStartOffsetMs(questionNumber) {
-  const index =
-    Number(questionNumber) - 1;
-
-  if (
-    !Number.isInteger(index) ||
-    index < 0 ||
-    index >= QUESTION_STARTS_MS.length
-  ) {
-    throw new Error(
-      'questionNumber must be an integer from 1 to 100'
-    );
-  }
-
-  return QUESTION_STARTS_MS[index];
-}
+export const EXAM_END_MS = 2200835;
 
 export function answerLockOffsetMs(questionNumber) {
-  const q =
-    Number(questionNumber);
+  const i = Number(questionNumber) - 1;
 
   if (
-    !Number.isInteger(q) ||
-    q < 1 ||
-    q > 100
+    !Number.isInteger(i) ||
+    i < 0 ||
+    i >= 100
   ) {
     throw new Error(
       'questionNumber must be an integer from 1 to 100'
     );
   }
 
-  if (q === 100) {
-    return EXAM_END_MS;
-  }
-
-  const nextStart =
-    QUESTION_STARTS_MS[q];
-
-  return q % 20 === 0
-    ? nextStart - SECTION_PREP_MS
-    : nextStart - NORMAL_GAP_MS;
-}
-
-export function prepStartOffsetMs(questionNumber) {
-  const q =
-    Number(questionNumber);
-
-  if (
-    ![20, 40, 60, 80].includes(q)
-  ) {
-    throw new Error(
-      'prepStartOffsetMs only applies to 20, 40, 60, 80'
-    );
-  }
-
-  return (
-    QUESTION_STARTS_MS[q] -
-    SECTION_PREP_MS
-  );
-}
-
-export function nextQuestionOffsetMs(questionNumber) {
-  const q =
-    Number(questionNumber);
-
-  if (
-    !Number.isInteger(q) ||
-    q < 1 ||
-    q >= 100
-  ) {
-    throw new Error(
-      'questionNumber must be an integer from 1 to 99'
-    );
-  }
-
-  return QUESTION_STARTS_MS[q];
+  return ANSWER_LOCKS_MS[i];
 }
 
 export function timelinePosition(elapsedMs) {
-  const t =
-    Math.max(
-      0,
-      Number(elapsedMs) || 0
-    );
+  const t = Math.max(
+    0,
+    Number(elapsedMs) || 0
+  );
 
-  if (
-    t <
-    QUESTION_STARTS_MS[0]
-  ) {
+  if (t < QUESTION_STARTS_MS[0]) {
     return {
       kind: 'initial-prep',
       question: 1,
@@ -203,10 +236,7 @@ export function timelinePosition(elapsedMs) {
     };
   }
 
-  if (
-    t >=
-    EXAM_END_MS
-  ) {
+  if (t >= EXAM_END_MS) {
     return {
       kind: 'finished',
       question: 101,
@@ -214,23 +244,16 @@ export function timelinePosition(elapsedMs) {
     };
   }
 
-  // 找到当前已开始的最后一道题。
   let low = 0;
-  let high =
-    QUESTION_STARTS_MS.length - 1;
+  let high = 99;
   let index = 0;
 
-  while (
-    low <= high
-  ) {
-    const mid =
-      Math.floor(
-        (low + high) / 2
-      );
+  while (low <= high) {
+    const mid = Math.floor(
+      (low + high) / 2
+    );
 
-    if (
-      QUESTION_STARTS_MS[mid] <= t
-    ) {
+    if (QUESTION_STARTS_MS[mid] <= t) {
       index = mid;
       low = mid + 1;
     } else {
@@ -238,18 +261,10 @@ export function timelinePosition(elapsedMs) {
     }
   }
 
-  const q =
-    index + 1;
+  const q = index + 1;
+  const section = Math.ceil(q / 20);
 
-  const section =
-    Math.ceil(q / 20);
-
-  const lockAt =
-    answerLockOffsetMs(q);
-
-  if (
-    t < lockAt
-  ) {
+  if (t < ANSWER_LOCKS_MS[index]) {
     return {
       kind: 'question',
       question: q,
@@ -257,37 +272,24 @@ export function timelinePosition(elapsedMs) {
     };
   }
 
-  if (
-    q < 100
-  ) {
-    const nextStart =
-      QUESTION_STARTS_MS[
-        index + 1
-      ];
+  if (q === 100) {
+    return {
+      kind: 'question',
+      question: q,
+      section
+    };
+  }
 
-    if (
-      t < nextStart
-    ) {
-      if (
-        q % 20 === 0
-      ) {
-        return {
-          kind: 'section-prep',
-          question: q + 1,
-          section: section + 1
-        };
-      }
-
-      return {
-        kind: 'gap',
-        question: q,
-        section
-      };
-    }
+  if (q % 20 === 0) {
+    return {
+      kind: 'section-prep',
+      question: q + 1,
+      section: section + 1
+    };
   }
 
   return {
-    kind: 'question',
+    kind: 'gap',
     question: q,
     section
   };
