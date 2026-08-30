@@ -19,8 +19,8 @@ export const CONFIG = {
   GOOGLE_APPS_SCRIPT_URL:
     'https://script.google.com/macros/s/AKfycbytKVM6qE11BpRjK6jixJlzLrwXSbu7hehSD5U90FtQwmEK8NJ6PeymR6zh9gorohHVmQ/exec',
 
-  // 新版使用独立存储，避免旧的固定10秒版本干扰。
-  STORAGE_KEY: 'pkru-listening-final-v4-audio-sync',
+  // HSK Neural 正式音频使用独立存储，避免旧时间轴记录干扰。
+  STORAGE_KEY: 'pkru-listening-final-v5-hsk-neural-sync',
 
-  VERSION: '4.0.0'
+  VERSION: '5.0.0'
 };
